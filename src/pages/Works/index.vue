@@ -1,12 +1,17 @@
 <template>
     <div>
-        
+        <workCard></workCard>
     </div>
 </template>
 
 <script>
+import workCard from '@/components/WorkCard/workCard.vue' 
 export default {
-    name:'worksPage'
+    name:'worksPage',
+
+    components:{
+        workCard
+    }
 }
 </script>
 

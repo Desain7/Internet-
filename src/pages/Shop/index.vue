@@ -1,12 +1,14 @@
 <template>
     <div>
-        
+        <goodsCard></goodsCard>
     </div>
 </template>
 
 <script>
+import goodsCard from './goodsCard/index.vue'
 export default {
-    name:'shopPage'
+    name:'shopPage',
+    components:{goodsCard}
 }
 </script>
 

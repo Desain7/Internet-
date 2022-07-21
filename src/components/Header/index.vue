@@ -14,9 +14,12 @@
           @select="handleSelect"
           router
         >
-          <el-menu-item index="Home">首页</el-menu-item>
-          <el-menu-item index="Works" >作品</el-menu-item>
-          <el-menu-item index="Shop" >商城</el-menu-item>
+          <el-menu-item
+            v-for="(item, index) in navIndex"
+            :key="index"
+            :index="item.navRouter"
+            >{{ item.navName }}</el-menu-item
+          >
         </el-menu></el-col
       >
       <el-col :span="6"
@@ -29,7 +32,15 @@
       ></el-col>
       <el-col :span="2">
         <div class="block">
-          <el-avatar :size="50" :src="avatarUrl"></el-avatar>
+          <el-dropdown>
+            <span class="el-dropdown-link">
+              <el-avatar :size="50" :src="avatarUrl"></el-avatar>
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item>我的主页</el-dropdown-item>
+              <el-dropdown-item divided>登录/注册</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
         </div>
       </el-col>
       <div class="line"></div>
@@ -42,15 +53,24 @@ export default {
   name: "myNavigation",
   data() {
     return {
-      activeIndex: "1",
-      searchInput:'',
-      avatarUrl:''
+      activeIndex: this.$router.currentRoute.name,
+      navIndex: [
+        { navName: "首页", navRouter: "Home" },
+        { navName: "作品", navRouter: "Works" },
+        { navName: "商城", navRouter: "Shop" },
+      ],
+      searchInput: "",
+      avatarUrl: "",
     };
   },
   methods: {
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
     },
+    // activeChange(index) {
+    //   this.activeIndex = index;
+    //   console.log(this.$router)
+    // },
   },
 };
 </script>
@@ -77,13 +97,13 @@ export default {
         margin: auto;
       }
     }
-    .block{
-        margin-top: 5%;
+    .block {
+      margin-top: 5%;
     }
   }
-  .line{
-    border-bottom: 1px solid rgb(230,230,230);
+  .line {
+    border-bottom: 1px solid rgb(230, 230, 230);
     margin-top: 60px;
-    }
+  }
 }
 </style>

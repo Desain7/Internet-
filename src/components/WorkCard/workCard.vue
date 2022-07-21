@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-card class="box-card">
+    <el-card class="work-box-card">
       <div class="left">
         <img src="" alt="" />
       </div>
@@ -14,10 +14,10 @@
         <div class="handle">
           <div class="icons">
             <el-button type="text">
-              <i class="iconfont icon-favorites"></i
+              <i class="iconfont icon-good"></i
             ></el-button>
             <el-button type="text">
-              <i class="iconfont icon-good"></i
+              <i class="iconfont icon-favorites"></i
             ></el-button>
           </div>
         </div>
@@ -41,7 +41,7 @@ export default {
 </script>
 
 <style lang="scss" >
-.box-card {
+.work-box-card {
   margin-top: 5%;
   width: 25rem;
   height: 15rem;
@@ -52,7 +52,7 @@ export default {
     .left {
       height: 90%;
       width: 10rem;
-      background-color: #bfc;
+      background-color: rgb(250,250,250);
       margin-right: 10%;
     }
     .right {

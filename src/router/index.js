@@ -12,33 +12,33 @@ Vue.use(Router)
 export default new Router({
     routes: [
         {
-            name: 'home',
-            path: '/home',
+            name: 'Home',
+            path: '/Home',
             component:Home,
         },
         {
-            name: 'works',
-            path: '/works',
+            name: 'Works',
+            path: '/Works',
             component:Works,
         },
         {
-            name:'register',
-            path: '/register',
+            name:'Register',
+            path: '/Register',
             component:Register,
         },
         {
-            name:'login',
-            path: '/login',
+            name:'Login',
+            path: '/Login',
             component:Login,
         },
         {
-            name:'shop',
-            path: '/shop',
+            name:'Shop',
+            path: '/Shop',
             component:Shop,
         },
         {
             path: '/',
-            redirect:'/home',
+            redirect:'/Home',
             component:Home,
         },
     ]
