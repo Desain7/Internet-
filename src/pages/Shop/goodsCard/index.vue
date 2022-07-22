@@ -3,12 +3,19 @@
     <div class="cardContainer">
       <el-card :body-style="{ padding: '0px' }">
         <div class="image">
-
+          <el-image>
+            <div slot="error" class="image-slot">
+              <i class="el-icon-picture-outline"></i>
+            </div>
+          </el-image>
         </div>
         <div class="content">
-          <span>好吃的汉堡</span>
-          <div class="bottom">
-            <time class="time"></time>
+          <div class="text">
+            <span>名称:</span>
+            <span>价格:</span>
+          </div>
+          <div class="sell">
+            <span>月销:</span>
           </div>
         </div>
       </el-card>
@@ -23,18 +30,33 @@ export default {
 </script>
 
 <style lang="scss">
-.cardContainer{
-    margin-top: 5%;
+.cardContainer {
+  margin-top: 5%;
+  width: 15rem;
+  height: 18rem;
+  .image {
     width: 15rem;
-    height: 18rem;
-    .image{
-        width: 15rem;
-        height: 10rem;
-        background-color: rgb(250,250,250);
-        overflow: hidden;
+    height: 10rem;
+    background-color: rgb(250, 250, 250);
+    overflow: hidden;
+  }
+  .content {
+    height: 8rem;
+    position: relative;
+    display: flex;
+    .text {
+      display: flex;
+      margin: auto 2rem;
+      flex-direction: column;
+      span {
+        text-align: left;
+      }
     }
-    .content{
-        height: 8rem;
+    .sell {
+      position: absolute;
+      bottom: 1rem;
+      right: 3rem;
     }
+  }
 }
 </style>

@@ -33,7 +33,7 @@
       <el-col :span="2">
         <div class="block">
           <el-dropdown>
-            <span class="el-dropdown-link">
+            <span class="el-dropdown-link avatarLink">
               <el-avatar :size="50" :src="avatarUrl"></el-avatar>
             </span>
             <el-dropdown-menu slot="dropdown">
@@ -99,6 +99,9 @@ export default {
     }
     .block {
       margin-top: 5%;
+      .avatarLink{
+        cursor: pointer;
+      }
     }
   }
   .line {
