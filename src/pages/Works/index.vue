@@ -15,6 +15,9 @@ export default {
     workCard,
     worksCategory,
   },
+  mounted() {
+    this.$store.dispatch('worksList')
+  }
 };
 </script>
 
