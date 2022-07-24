@@ -32,13 +32,15 @@
       ></el-col>
       <el-col :span="2">
         <div class="block">
-          <el-dropdown>
+          <el-dropdown >
             <span class="el-dropdown-link avatarLink">
               <el-avatar :size="50" :src="avatarUrl"></el-avatar>
             </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item>我的主页</el-dropdown-item>
-              <el-dropdown-item divided>登录/注册</el-dropdown-item>
+              <el-dropdown-item divided @click.native="goLogin">
+                登录
+              </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
@@ -67,10 +69,10 @@ export default {
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
     },
-    // activeChange(index) {
-    //   this.activeIndex = index;
-    //   console.log(this.$router)
-    // },
+    goLogin() {
+      console.log(111);
+      this.$store.dispatch('showLogin')
+    },
   },
 };
 </script>
@@ -99,7 +101,7 @@ export default {
     }
     .block {
       margin-top: 5%;
-      .avatarLink{
+      .avatarLink {
         cursor: pointer;
       }
     }

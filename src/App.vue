@@ -2,29 +2,33 @@
   <div id="app">
     <myNavigation></myNavigation>
     <router-view></router-view>
-    <!-- <worksCard></worksCard> -->
+    <loginRegister :v-if="showLogin"></loginRegister>
   </div>
 </template>
 
 <script>
-import myNavigation from '@/components/Header/index.vue'
-// import worksCard from '@/components/WorkCard/workCard.vue'
+import myNavigation from "@/components/Header/index.vue";
+import loginRegister from "@/components/Login/index.vue";
 
 export default {
-  name: 'App',
+  name: "App",
+  data() {
+    return {
+      showLogin:this.$store.state.showLogin,
+    }
+  },
   components: {
     myNavigation,
-    // worksCard
-  }
-}
+    loginRegister,
+  },
+};
 </script>
 
-<style>
+<style lang='scss'>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
 }
-
 </style>
