@@ -15,7 +15,8 @@ export default {
         },
         GETCODE(state, identifyCode) {
             state.identifyCode = identifyCode
-        }
+        },
+        
     },
     actions: {
         showLogin({ commit }) {

@@ -37,6 +37,10 @@ export default {
 
 <style lang="scss">
 .box-card {
+  background-color:rgb(243,240,232);
+  width: 90%;
+  border-radius: 1rem;
+  margin: 1rem auto;
   .title {
     span {
       float: left;

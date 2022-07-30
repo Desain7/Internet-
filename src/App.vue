@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <myNavigation></myNavigation>
+    <myNavigation ></myNavigation>
     <router-view></router-view>
-    <loginRegister :v-if="showLogin"></loginRegister>
+    <loginRegister></loginRegister>
   </div>
 </template>
 
@@ -14,7 +14,7 @@ export default {
   name: "App",
   data() {
     return {
-      showLogin:this.$store.state.showLogin,
+
     }
   },
   components: {
@@ -30,5 +30,9 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
+  
+}
+body{
+  background-image: url('@/assets/background.jpg');
 }
 </style>

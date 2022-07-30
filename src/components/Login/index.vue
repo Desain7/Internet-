@@ -228,7 +228,7 @@ export default {
       this.getCode();
     },
     getCode() {
-      this.$store.dispatch("getCode");
+      // this.$store.dispatch("getCode"); //获取验证码
       this.identifyCode = this.$store.state.login.identifyCode;
     },
     submitLogin() {

@@ -1,16 +1,16 @@
 <template>
-  <div>
+  <div v-if="$route.meta.showNav" class="mainIndex">
     <el-row :gutter="8">
       <el-col :span="2">
         <div class="title">
-          <span class="text"> 赣州非遗 </span>
+          <span class="text"></span>
         </div>
       </el-col>
       <el-col :span="14">
         <el-menu
           :default-active="activeIndex"
-          class="el-menu-demo"
           mode="horizontal"
+          background-color="rgb(243,240,232)"
           @select="handleSelect"
           router
         >
@@ -27,25 +27,28 @@
           placeholder="请输入内容"
           prefix-icon="el-icon-search"
           v-model="searchInput"
+          @blur="goSearch"
         >
         </el-input
       ></el-col>
       <el-col :span="2">
         <div class="block">
-          <el-dropdown >
+          <el-dropdown>
             <span class="el-dropdown-link avatarLink">
               <el-avatar :size="50" :src="avatarUrl"></el-avatar>
             </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item>我的主页</el-dropdown-item>
+              <el-dropdown-item @click.native="goBackStage"
+                >管理后台</el-dropdown-item
+              >
               <el-dropdown-item divided @click.native="goLogin">
-                登录
+                登录/注册
               </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
       </el-col>
-      <div class="line"></div>
     </el-row>
   </div>
 </template>
@@ -70,45 +73,62 @@ export default {
       console.log(key, keyPath);
     },
     goLogin() {
-      console.log(111);
-      this.$store.dispatch('showLogin')
+      this.$store.dispatch("showLogin");
+    },
+    goBackStage() {
+      this.$router.push("/BackStage");
+    },
+    goSearch() {
+      this.activeIndex = "Works";
+      let location = {
+        name: "Works",
+        params: { key: this.searchInput || undefined },
+      };
+      this.$router.push(location);
     },
   },
 };
 </script>
 
 <style lang="scss">
-.el-row {
-  height: 3.5rem;
-  .el-col {
-    height: 100%;
-    div {
+.mainIndex {
+  background-color: rgb(243, 240, 232);
+  border-radius: 1rem;
+  .el-row {
+    height: 3.5rem;
+    .el-col {
       height: 100%;
-    }
-    .el-input {
-      margin-top: 2.5%;
-      .el-input__icon {
-        height: 70%;
-        text-align: center;
-        transition: all 0.3s;
+      .el-menu-item {
+        height: 3.5rem;
+      }
+      div {
+        height: 100%;
+      }
+      .el-input {
+        margin-top: 2.5%;
+        .el-input__icon {
+          height: 70%;
+          text-align: center;
+          transition: all 0.3s;
+        }
+      }
+      .title {
+        display: flex;
+        .text {
+          width: 100%;
+          height: 80%;
+          margin: auto;
+          background-image: url("@/assets/title.png");
+          background-size: cover;
+        }
+      }
+      .block {
+        margin-top: 5%;
+        .avatarLink {
+          cursor: pointer;
+        }
       }
     }
-    .title {
-      display: flex;
-      .text {
-        margin: auto;
-      }
-    }
-    .block {
-      margin-top: 5%;
-      .avatarLink {
-        cursor: pointer;
-      }
-    }
-  }
-  .line {
-    border-bottom: 1px solid rgb(230, 230, 230);
-    margin-top: 60px;
   }
 }
 </style>

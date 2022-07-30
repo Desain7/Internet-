@@ -1,20 +1,20 @@
 <template>
-  <div>
-    <el-card class="work-box-card">
+  <div class="work-card">
+    <el-card class="work-box-card" @click.native="goInform()">
       <div class="left">
-        <el-image>
-          <div slot="error" class="image-slot">
-            <i class="el-icon-picture-outline"></i>
-          </div>
-        </el-image>
+        <el-image
+          style="width: 100%; height: 100%"
+          src="https://feiyi-141.oss-cn-hangzhou.aliyuncs.com/2022-07-18/bf9d7f1d876d416e8075a6d7a2130901.jpg"
+          fit="fit"
+        ></el-image>
       </div>
       <div class="right">
         <div class="text">
-          <div>作品名:{{ name }}</div>
-          <div v-if="false">作者:{{ author }}</div>
-          <div>作品分类:{{ type }}</div>
-          <div>创建时间:{{ time }}</div>
-          <div>介绍:{{ describe }}</div>
+          <div>作品名:{{ work.name }}</div>
+          <div v-if="false">作者:{{ work.author }}</div>
+          <div>作品分类:{{ work.opusType }}</div>
+          <div>创建时间:{{ work.crateTime }}</div>
+          <!-- <div class="describe">介绍:{{ work.opusIntroduce }}</div> -->
         </div>
         <div class="handle">
           <div class="icons">
@@ -35,48 +35,65 @@
 <script>
 export default {
   data() {
-    return {
-      name: 123,
-      author: 123,
-      type: 123,
-      time: 123,
-      describe: 123,
-    };
+    return {};
+  },
+  props: ["work"],
+  methods: {
+    goInform(item) {
+      let location = { name: "WorkInform", params: "" };
+      this.$router.push(location);
+      console.log(item);
+      console.log(123123123123);
+    },
   },
 };
 </script>
 
 <style lang="scss" >
-.work-box-card {
-  margin-top: 5%;
-  width: 25rem;
-  min-height: 15rem;
-  .el-card__body {
-    display: flex;
-    flex-direction: row;
-    height: 90%;
-    .left {
-      width: 10rem;
-      background-color: rgb(250, 250, 250);
-      margin-right: 10%;
-    }
-    .right {
+.work-card {
+  display: inline-block;
+  margin: 1%;
+  .work-box-card {
+    margin-top: 5%;
+    width: 25rem;
+    height: 15rem;
+    background-image: url("@/assets/边框1.png");
+    background-size: cover;
+    cursor: pointer;
+    .el-card__body {
+      display: flex;
+      flex-direction: row;
       height: 90%;
-      width: 10rem;
-      .text {
-        div {
-          text-align: left;
-          margin-top: 10%;
+      .left {
+        width: 10rem;
+        background-color: rgb(250, 250, 250);
+        margin-right: 10%;
+        .describe {
         }
       }
-      .handle {
-        .icons {
-          float: right;
+      .right {
+        position: relative;
+        height: 90%;
+        width: 10rem;
+        .text {
+          div {
+            text-align: left;
+            margin-top: 5%;
+          }
+        }
+        .handle {
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          .icons {
+            text-align: right;
+          }
         }
       }
     }
   }
 }
+
 .icon {
   width: 1em;
   height: 1em;

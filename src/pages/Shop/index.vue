@@ -1,7 +1,15 @@
 <template>
   <div>
     <categoryCard></categoryCard>
-    <goodsCard></goodsCard>
+    <div class="goodsCardContainer">
+      <goodsCard></goodsCard>
+      <goodsCard></goodsCard>
+      <goodsCard></goodsCard>
+      <goodsCard></goodsCard>
+      <goodsCard></goodsCard>
+      <goodsCard></goodsCard>
+      <goodsCard></goodsCard>
+    </div>
   </div>
 </template>
 
@@ -15,4 +23,13 @@ export default {
 </script>
 
 <style lang="scss">
+.goodsCardContainer {
+  margin: 0 auto;
+  width: 95%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
 </style>

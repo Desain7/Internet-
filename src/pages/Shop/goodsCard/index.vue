@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="goodsCard">
     <div class="cardContainer">
       <el-card :body-style="{ padding: '0px' }">
         <div class="image">
@@ -30,32 +30,36 @@ export default {
 </script>
 
 <style lang="scss">
-.cardContainer {
-  margin-top: 5%;
-  width: 15rem;
-  height: 18rem;
-  .image {
+.goodsCard {
+  margin: 2%;
+  .cardContainer {
+    margin-top: 5%;
     width: 15rem;
-    height: 10rem;
-    background-color: rgb(250, 250, 250);
-    overflow: hidden;
-  }
-  .content {
-    height: 8rem;
-    position: relative;
-    display: flex;
-    .text {
-      display: flex;
-      margin: auto 2rem;
-      flex-direction: column;
-      span {
-        text-align: left;
-      }
+    height: 18rem;
+
+    .image {
+      width: 15rem;
+      height: 10rem;
+      background-color: rgb(250, 250, 250);
+      overflow: hidden;
     }
-    .sell {
-      position: absolute;
-      bottom: 1rem;
-      right: 3rem;
+    .content {
+      height: 8rem;
+      position: relative;
+      display: flex;
+      .text {
+        display: flex;
+        margin: auto 2rem;
+        flex-direction: column;
+        span {
+          text-align: left;
+        }
+      }
+      .sell {
+        position: absolute;
+        bottom: 1rem;
+        right: 3rem;
+      }
     }
   }
 }
