@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="carousel">
     <el-carousel :interval="5000" arrow="always">
       <el-carousel-item v-for="item in 4" :key="item">
         <el-image
@@ -19,4 +19,7 @@ export default {
 </script>
 
 <style lang="scss">
+.carousel{
+  width: 100%;
+}
 </style>

@@ -30,9 +30,9 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  
 }
 body{
   background-image: url('@/assets/background.jpg');
+  margin: 0 auto;
 }
 </style>

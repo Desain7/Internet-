@@ -3,7 +3,10 @@
     <el-row :gutter="8">
       <el-col :span="2">
         <div class="title">
-          <span class="text"></span>
+          <el-image
+            :src="require('../../assets/title.png')"
+            fit="contain"
+          ></el-image>
         </div>
       </el-col>
       <el-col :span="14">
@@ -93,7 +96,7 @@ export default {
 <style lang="scss">
 .mainIndex {
   background-color: rgb(243, 240, 232);
-  border-radius: 1rem;
+  border-radius: 0 0 1rem 1rem ;
   .el-row {
     height: 3.5rem;
     .el-col {
@@ -114,13 +117,6 @@ export default {
       }
       .title {
         display: flex;
-        .text {
-          width: 100%;
-          height: 80%;
-          margin: auto;
-          background-image: url("@/assets/title.png");
-          background-size: cover;
-        }
       }
       .block {
         margin-top: 5%;
