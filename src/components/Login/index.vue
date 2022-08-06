@@ -364,27 +364,42 @@ export default {
   }
 }
 @keyframes slideIn {
-  0% {
+0% {
+    -webkit-transform: translateZ(-800px) rotateY(90deg);
+            transform: translateZ(-800px) rotateY(90deg);
     opacity: 0;
   }
-
-  100% {
+  54% {
+    -webkit-transform: translateZ(-160px) rotateY(90deg);
+            transform: translateZ(-160px) rotateY(90deg);
     opacity: 1;
+  }
+  100% {
+    -webkit-transform: translateZ(0) rotateY(0);
+            transform: translateZ(0) rotateY(0);
   }
 }
 
 @keyframes slideOut {
   0% {
+    -webkit-transform: translateZ(0) rotateY(0);
+            transform: translateZ(0) rotateY(0);
     opacity: 1;
   }
-
+  54% {
+    -webkit-transform: translateZ(-160px) rotateY(90deg);
+            transform: translateZ(-160px) rotateY(90deg);
+    opacity: 1;
+  }
   100% {
+    -webkit-transform: translateZ(-800px) rotateY(90deg);
+            transform: translateZ(-800px) rotateY(90deg);
     opacity: 0;
   }
 }
 
 .slide-enter-active {
-  animation: slideIn 0.5s;
+  animation: slideIn 1s;
 }
 
 .slide-leave-active {

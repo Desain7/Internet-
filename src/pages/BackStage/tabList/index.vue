@@ -1,63 +1,77 @@
 <template>
   <div class="sideNav">
-      <el-menu
-        default-active="2"
-        class="navBar"
-        @open="handleOpen"
-        @close="handleClose"
-        background-color="#545c64"
-        text-color="#fff"
-        active-text-color="#ffd04b"
+    <el-menu
+      default-active="work"
+      class="navBar"
+      background-color="rgb(14,23,49)"
+      text-color="#fff"
+      active-text-color="rgb(27,129,168)"
+      router
+    >
+      <el-menu-item
+        v-for="(item, index) in navIndex"
+        :key="index"
+        :index="item.navRouter"
       >
-        <el-submenu index="1">
-          <template slot="title">
-            <i class="el-icon-location"></i>
-            <span>导航一</span>
-          </template>
-          <el-menu-item-group>
-            <template slot="title">分组一</template>
-            <el-menu-item index="1-1">选项1</el-menu-item>
-            <el-menu-item index="1-2">选项2</el-menu-item>
-          </el-menu-item-group>
-          <el-menu-item-group title="分组2">
-            <el-menu-item index="1-3">选项3</el-menu-item>
-          </el-menu-item-group>
-          <el-submenu index="1-4">
-            <template slot="title">选项4</template>
-            <el-menu-item index="1-4-1">选项1</el-menu-item>
-          </el-submenu>
-        </el-submenu>
-        <el-menu-item index="2">
-          <i class="el-icon-menu"></i>
-          <span slot="title">导航二</span>
-        </el-menu-item>
-        <el-menu-item index="3">
-          <i class="el-icon-document"></i>
-          <span slot="title">导航三</span>
-        </el-menu-item>
-        <el-menu-item index="4">
-          <i class="el-icon-setting"></i>
-          <span slot="title">导航四</span>
-        </el-menu-item>
-      </el-menu>
+        <span>{{ item.navName }}</span>
+      </el-menu-item>
+      <div class="backHome" @click="backHome">
+        <span>返回首页</span>
+      </div>
+    </el-menu>
   </div>
 </template>
 
 <script>
 export default {
-    name:'tabList'
+  name: "tabList",
+  data() {
+    return {
+      activeIndex: "work",
+      navIndex: [
+        { navName: "作品管理", navRouter: "work" },
+        { navName: "评论管理", navRouter: "comments" },
+        { navName: "作者管理", navRouter: "worker" },
+        { navName: "视频管理", navRouter: "video" },
+      ],
+    };
+  },
+  methods: {
+    backHome() {
+      this.$router.push("/Home");
+    },
+  },
 };
 </script>
 
 <style lang="scss">
-.sideNav{
-    width: 10%;
+.el-menu {
+  border-right: solid 1px rgb(35, 42, 69);
+}
+.sideNav {
+  width: 8%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  .navBar {
     height: 100%;
-    position: absolute;
-    left: 0;
-    .navBar{
-        height: 100%;
-        text-align: left;
+    text-align: left;
+    .el-menu-item {
+      span {
+        display: inline-block;
+        margin: 0 auto;
+      }
     }
+
+    .backHome {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      span {
+        color: white;
+        cursor: pointer;
+      }
+    }
+  }
 }
 </style>

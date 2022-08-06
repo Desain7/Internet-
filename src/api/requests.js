@@ -17,7 +17,7 @@ request.interceptors.response.use((res) => {
     return res.data
 }, (error) => {
     error
-    return Promise.reject(new Error('fail'))
+    return Promise.reject(new Error('Fail to get data'))
 })
 
 export default request
