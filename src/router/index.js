@@ -53,6 +53,11 @@ export default new Router({
                     name:'work',
                     path:'work',
                     component:Work,
+                    // children:[{
+                    //     name:'edit',
+                    //     path:'edit',
+                    //     component:Edit
+                    // }]
                 },
                 {
                     name:'comments',

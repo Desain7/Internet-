@@ -20,6 +20,7 @@ export default {
 
 <style lang="scss">
 .carousel{
+  margin-top: 1%;
   width: 100%;
 }
 </style>

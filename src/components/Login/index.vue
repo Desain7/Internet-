@@ -34,7 +34,7 @@
                 ></el-input>
               </el-form-item>
               <el-form-item
-                prop="password"
+                prop="pass"
                 :rules="{
                   required: true,
                   message: '请输入密码',
@@ -45,7 +45,7 @@
                   type="password"
                   auto-complete="off"
                   placeholder="请输入密码"
-                  v-model="loginForm.password"
+                  v-model="loginForm.pass"
                 ></el-input>
               </el-form-item>
               <el-form-item
@@ -221,6 +221,7 @@ export default {
       if (!login.contains(e.target) && !register.contains(e.target)) {
         this.$store.dispatch("showLogin");
       }
+      
     },
     login() {},
     refreshCode() {
@@ -228,10 +229,11 @@ export default {
       this.getCode();
     },
     getCode() {
-      // this.$store.dispatch("getCode"); //获取验证码
+      this.$store.dispatch("getCode"); //获取验证码
       this.identifyCode = this.$store.state.login.identifyCode;
     },
     submitLogin() {
+      console.log(this.loginForm)
       this.$store.dispatch("login", this.loginForm);
     },
     goRegister() {

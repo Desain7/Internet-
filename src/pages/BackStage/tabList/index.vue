@@ -8,13 +8,24 @@
       active-text-color="rgb(27,129,168)"
       router
     >
-      <el-menu-item
+      <el-submenu
         v-for="(item, index) in navIndex"
         :key="index"
         :index="item.navRouter"
       >
-        <span>{{ item.navName }}</span>
-      </el-menu-item>
+        <!-- 一级菜单模板 -->
+        <template slot="title">
+          <!-- 图标 -->
+          <!-- <i :class="iconsObj[item.id]"></i> -->
+          <!-- 文本 -->
+          <span>{{ item.navName }}</span>
+        </template>
+        <!-- 二级菜单模板 -->
+        <el-menu-item :index="item.navRouter">
+          <span>{{ item.navName }}</span>
+        </el-menu-item>
+      </el-submenu>
+
       <div class="backHome" @click="backHome">
         <span>返回首页</span>
       </div>
@@ -46,20 +57,21 @@ export default {
 
 <style lang="scss">
 .el-menu {
-  border-right: solid 1px rgb(35, 42, 69);
+  border-right: solid 0;
 }
 .sideNav {
-  width: 8%;
+  width: 10%;
   height: 100%;
   position: absolute;
   left: 0;
+  overflow: hidden;
   .navBar {
     height: 100%;
     text-align: left;
     .el-menu-item {
       span {
         display: inline-block;
-        margin: 0 auto;
+        padding: 0 12%;
       }
     }
 

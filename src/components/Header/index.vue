@@ -61,7 +61,7 @@ export default {
   name: "myNavigation",
   data() {
     return {
-      activeIndex: this.$router.currentRoute.name,
+      activeIndex: 'Home',
       navIndex: [
         { navName: "首页", navRouter: "Home" },
         { navName: "作品", navRouter: "Works" },
@@ -90,13 +90,16 @@ export default {
       this.$router.push(location);
     },
   },
+  mounted(){
+    this.activeIndex = this.$router.currentRoute.name
+  }
 };
 </script>
 
 <style lang="scss">
 .mainIndex {
   background-color: rgb(243, 240, 232);
-  border-radius: 0 0 1rem 1rem ;
+  border-radius: 1rem 1rem ;
   .el-row {
     height: 3.5rem;
     .el-col {

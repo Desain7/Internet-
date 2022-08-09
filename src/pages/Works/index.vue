@@ -88,7 +88,7 @@ export default {
     worksCategory,
   },
   mounted() {
-    // this.$store.dispatch('worksList')
+    this.$store.dispatch('worksList')
   },
 };
 </script>

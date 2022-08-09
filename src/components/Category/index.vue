@@ -26,6 +26,7 @@ export default {
 
 <style lang="scss">
 .category {
+  text-align: center;
   display: flex;
   flex-direction: row;
   height: 3rem;

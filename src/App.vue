@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <myNavigation ></myNavigation>
-    <router-view ></router-view>
+    <myNavigation></myNavigation>
+    <router-view></router-view>
     <loginRegister></loginRegister>
   </div>
 </template>
@@ -13,9 +13,7 @@ import loginRegister from "@/components/Login/index.vue";
 export default {
   name: "App",
   data() {
-    return {
-
-    }
+    return {};
   },
   components: {
     myNavigation,
@@ -29,10 +27,8 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
 }
-body{
-  background-image: url('@/assets/background.jpg');
-  margin: 0 auto;
+body {
+  background-image: url("@/assets/background.jpg");
 }
 </style>

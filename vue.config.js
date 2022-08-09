@@ -5,6 +5,9 @@ module.exports = defineConfig({
     proxy:{
       '/api':{
         target:'http://192.168.193.141:8080/feiyi',
+        pathRewrite: {
+          '/api': '' 
+        }
       }
     }
   }

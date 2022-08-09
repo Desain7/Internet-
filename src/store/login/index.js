@@ -7,7 +7,8 @@ Vue.use(Vuex)
 export default {
     state: {
         showLogin: false,
-        identifyCode:''
+        identifyCode:'',
+        loginData:{}
     },
     mutations: {
         SHOWLOGIN(state) {
@@ -16,6 +17,9 @@ export default {
         GETCODE(state, identifyCode) {
             state.identifyCode = identifyCode
         },
+        LOGIN(state, loginData) {
+            state.loginData = loginData
+        }
         
     },
     actions: {
@@ -29,9 +33,9 @@ export default {
             }
         },
         async login({commit}, params = {}) {
-            let result = await login(params)
-            if(result.code == 200) {
-                commit()
+            let res = await login(params)
+            if(res.code == 200) {
+                commit('LOGIN',res.data)
             }
         }
     },
