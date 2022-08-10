@@ -9,8 +9,13 @@ const request = axios.create({
 
 request.interceptors.request.use((config) => {
     nprogress.start()
+    if (localStorage.getItem('feiyiuser')){
+        let user = localStorage.getItem('feiyiuser')
+        config.headers.token = user.token
+    }
     return config
 })
+
 
 request.interceptors.response.use((res) => {
     nprogress.done()

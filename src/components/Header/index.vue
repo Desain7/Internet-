@@ -61,7 +61,7 @@ export default {
   name: "myNavigation",
   data() {
     return {
-      activeIndex: 'Home',
+      activeIndex: "Home",
       navIndex: [
         { navName: "首页", navRouter: "Home" },
         { navName: "作品", navRouter: "Works" },
@@ -72,8 +72,35 @@ export default {
     };
   },
   methods: {
+    checkLogin() {
+      if (this.getLocalData("user")) {
+        this.$message({
+          type: "success",
+          message: this.$store.login.userData.webName,
+        });
+      } else {
+        this.pleaseLogin()
+      }
+    },
+    getLocalData(key) {
+      let storageTimestamp = localStorage.getItem(`${key}Timestamp`);
+      let expires = 1000 * 3600 * 24 * 5; // 有效时间
+      let timestamp = Date.now(); // 当前时间
+      if (storageTimestamp && timestamp - storageTimestamp < expires) {
+        let inform = localStorage.getItem(`feiyi${key}`); // 从缓存中拿到数据给程序使用
+        this.$store.state.login[`${key}data`] = JSON.parse(inform);
+        return true;
+      }
+      return false;
+    },
+    pleaseLogin() {
+      this.$message.error("请先登录再进行操作！");
+      this.$store.dispatch("showLogin");
+    },
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
+      this.checkLogin()
+      
     },
     goLogin() {
       this.$store.dispatch("showLogin");
@@ -90,16 +117,17 @@ export default {
       this.$router.push(location);
     },
   },
-  mounted(){
-    this.activeIndex = this.$router.currentRoute.name
-  }
+  mounted() {
+    this.activeIndex = this.$router.currentRoute.name;
+    this.checkLogin()
+  },
 };
 </script>
 
 <style lang="scss">
 .mainIndex {
   background-color: rgb(243, 240, 232);
-  border-radius: 1rem 1rem ;
+  border-radius: 1rem 1rem;
   .el-row {
     height: 3.5rem;
     .el-col {

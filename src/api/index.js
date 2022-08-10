@@ -10,5 +10,5 @@ export const reqIdentifyCode = () => {
 export const login = (params) => request({
     url:'/login',
     method:'post',
-    data:params,
+    params:params,
 })

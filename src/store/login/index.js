@@ -8,7 +8,7 @@ export default {
     state: {
         showLogin: false,
         identifyCode:'',
-        loginData:{}
+        userData:{}
     },
     mutations: {
         SHOWLOGIN(state) {
@@ -19,6 +19,8 @@ export default {
         },
         LOGIN(state, loginData) {
             state.loginData = loginData
+            localStorage.setItem('feiyiuser', JSON.stringify(loginData))
+            localStorage.setItem(`userTimestamp`, Date.now()); 
         }
         
     },
@@ -29,13 +31,19 @@ export default {
         async getCode({ commit }) {
             let res = await reqIdentifyCode()
             if(res.code == 200) {
-                commit('GETCODE', res.msg)
+                commit('GETCODE', res.data)
             }
         },
         async login({commit}, params = {}) {
+            console.log(params)
             let res = await login(params)
+
             if(res.code == 200) {
                 commit('LOGIN',res.data)
+                this.$message({
+                    message: `[登陆成功]${res.data.webName}`,
+                    type: 'success'
+                  });
             }
         }
     },

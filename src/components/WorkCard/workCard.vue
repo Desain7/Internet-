@@ -3,17 +3,17 @@
     <el-card class="work-box-card" @click.native="goInform()">
       <div class="left">
         <el-image
-          style="width: 100%; height: 100%"
+          style="width: 80%; height: 80%"
           src="https://feiyi-141.oss-cn-hangzhou.aliyuncs.com/2022-07-18/bf9d7f1d876d416e8075a6d7a2130901.jpg"
-          fit="fit"
+          fit="cover"
         ></el-image>
       </div>
       <div class="right">
         <div class="text">
-          <div>名称:{{ work.name }}</div>
+          <div class="title">赣州擂茶{{ work.name }}</div>
           <div v-if="false">作者:{{ work.author }}</div>
-          <div>分类:{{ work.opusType }}</div>
-          <div>创建时间:{{ work.crateTime }}</div>
+          <div>{{ work.opusType }}</div>
+          <div>{{ work.opusIntroduce }}</div>
           <!-- <div class="describe">介绍:{{ work.opusIntroduce }}</div> -->
         </div>
         <!-- <div class="handle">
@@ -57,9 +57,9 @@ export default {
     margin-top: 5%;
     width: 25rem;
     height: 15rem;
-    background-color: rgb(243,240,232);
+    background-color: rgb(243, 240, 232);
     background-image: url("@/assets/边框1.png");
-    background-size:25rem 15rem;
+    background-size: 25rem 15rem;
     background-repeat: no-repeat;
     cursor: pointer;
     .el-card__body {
@@ -69,9 +69,10 @@ export default {
 
       .left {
         width: 10rem;
-        background-color: rgb(250, 250, 250);
         margin-right: 10%;
-        .describe {
+        display: flex;
+        .el-image{
+          margin: auto;
         }
       }
       .right {
@@ -82,6 +83,20 @@ export default {
           div {
             text-align: left;
             margin-top: 5%;
+            font: 16px "微软雅黑";
+            color: #000;
+            text-shadow: #fff 0px 2px;
+            font-weight: 100;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 4;
+            overflow: hidden;
+          }
+          .title {
+            font: 30px "微软雅黑";
+            color: #000;
+            text-shadow: #fff 0px 2px;
+            font-weight: 100;
           }
         }
         .handle {

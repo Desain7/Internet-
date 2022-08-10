@@ -21,7 +21,7 @@
           </div>
           <div class="type">
             <span class="title">作者：</span>
-            <span class="content">{{ workInform.author }}</span>
+            <span class="content" style="cursor: pointer;">{{ workInform.author }}</span>
           </div>
           <div class="type">
             <span class="title">创建时间：</span>
@@ -79,6 +79,9 @@ export default {
         origin:
           "擂茶源自北宋，至今已有千年历史。从选料、制作、冲泡，都别具特色。关于擂茶的起源，相传三国时刘备率领军队过洞庭湖，军中将士染上一种怪病，一路上病倒数千人。队伍扶病行军勉强支撑到了桃花江，再也无力前进，刘备只得下令就地驻扎，并派人四处寻医问药。医方找来不少，但均不见效。一日，一位老翁路过刘备军营，见军中将士纪律严明，很受感动，便主动献出祖传秘方“三生汤”（即生米、生姜、生茶叶）。当地老百姓找一来陶钵和木棒，并按照老翁的配料和制作方法，把生米、生姜、生茶叶捣碎，冲上开水让将士们饮用。其效果果然十分灵验，有病的迅速康复，无病的不再感染。",
       },
+      commentsInform:{
+        
+      }
     };
   },
 };

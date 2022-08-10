@@ -2,7 +2,7 @@
   <div id="app">
     <myNavigation></myNavigation>
     <router-view></router-view>
-    <loginRegister></loginRegister>
+    <loginRegister v-if="this.$store.state.login.showLogin"></loginRegister>
   </div>
 </template>
 

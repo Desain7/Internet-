@@ -10,11 +10,11 @@
             </el-input>
           </el-col>
           <el-col :span="4">
-            <el-button type="primary" @click="goAddPage">添加作品</el-button>
+            <el-button type="primary" @click="goAdd">添加作品</el-button>
           </el-col>
         </el-row>
         <el-table :data="workList" style="width: 100%" height="string">
-          <el-table-column type="index"></el-table-column>
+          <el-table-column type="selection" width="55"> </el-table-column>
           <el-table-column prop="opusName" label="作品名称" width="100px">
           </el-table-column>
           <el-table-column prop="id" label="作品ID" width="80px">
@@ -45,21 +45,21 @@
 
           <el-table-column prop="author" label="作者" width="100px">
           </el-table-column>
-          <el-table-column label="创建时间" width="140px" prop="createTime">
+          <el-table-column label="创建时间" width="120px" prop="createTime">
           </el-table-column>
-          <el-table-column label="操作" width="130px">
+          <el-table-column label="操作" width="120px">
             <template slot-scope="scope">
               <el-button
                 type="primary"
                 icon="el-icon-edit"
                 size="mini"
-                @click="handleEdit(scope.row.id)"
+                @click="handleEdit(scope.row)"
               ></el-button>
               <el-button
                 type="danger"
                 icon="el-icon-delete"
                 size="mini"
-                @click=" handleDelete"
+                @click="handleDelete"
               ></el-button>
             </template>
           </el-table-column>
@@ -77,25 +77,105 @@
         >
         </el-pagination>
       </el-card>
-                  <el-dialog
-      title="编辑作品"
-      :visible.sync="editWorkVisible"
-      width="50%"
-      @close="editWorkClosed"
-    >
-      <el-form
-        :model="editWorkInform"
-        label-width="100px"
+      <el-dialog
+        title="编辑作品"
+        :visible.sync="editWorkVisible"
+        width="50%"
+        @close="editWorkClosed"
+        :fullscreen="true"
       >
-        <el-form-item label="作品名称">
-          <el-input v-model="editWorkInform.opusName"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click.native="editWorkVisible = false">取 消</el-button>
-        <el-button type="primary" @click="confirmEdit">确 定</el-button>
-      </span>
-    </el-dialog>
+        <el-form :model="editWorkInform" label-width="100px">
+          <el-form-item label="作品id">
+            <el-input v-model="editWorkInform.id"></el-input>
+          </el-form-item>
+          <el-form-item label="作品名称">
+            <el-input v-model="editWorkInform.opusName"></el-input>
+          </el-form-item>
+          <el-form-item label="作者">
+            <el-input v-model="editWorkInform.author"></el-input>
+          </el-form-item>
+          <el-form-item label="作品介绍">
+            <el-input
+              type="textarea"
+              v-model="editWorkInform.opusIntroduce"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="作品类型">
+            <el-input v-model="editWorkInform.opusType"></el-input>
+          </el-form-item>
+          <el-form-item label="作品标题">
+            <el-input v-model="editWorkInform.opusTitle"></el-input>
+          </el-form-item>
+          <el-form-item label="图片资源">
+            <el-upload action="#" list-type="picture-card" :auto-upload="false">
+              <i slot="default" class="el-icon-plus"></i>
+              <div slot="file" slot-scope="{ file }">
+                <img
+                  class="el-upload-list__item-thumbnail"
+                  :src="file.url"
+                  alt=""
+                />
+                <span class="el-upload-list__item-actions">
+                  <span
+                    class="el-upload-list__item-preview"
+                    @click="handlePictureCardPreview(file)"
+                  >
+                    <i class="el-icon-zoom-in"></i>
+                  </span>
+                  <span
+                    v-if="!disabled"
+                    class="el-upload-list__item-delete"
+                    @click="handleRemove(file)"
+                  >
+                    <i class="el-icon-delete"></i>
+                  </span>
+                </span>
+              </div>
+            </el-upload>
+            <el-dialog :visible.sync="dialogVisible">
+              <img width="100%" :src="dialogImageUrl" alt="" />
+            </el-dialog>
+          </el-form-item>
+          <el-form-item label="视频资源">
+            <el-upload
+              class="upload-demo"
+              action="https://jsonplaceholder.typicode.com/posts/"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              :before-remove="beforeRemove"
+              multiple
+              :limit="3"
+              :on-exceed="handleExceed"
+              :file-list="fileList"
+            >
+              <el-button size="small" type="primary">点击上传</el-button>
+              <div slot="tip" class="el-upload__tip"></div>
+            </el-upload>
+          </el-form-item>
+          <el-form-item label="创建时间">
+            <el-input v-model="editWorkInform.createTime"></el-input>
+          </el-form-item>
+          <el-form-item label="历史">
+            <el-input
+              type="textarea"
+              v-model="editWorkInform.history"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="制作">
+            <el-input type="textarea" v-model="editWorkInform.make"></el-input>
+          </el-form-item>
+          <el-form-item label="起源">
+            <el-input
+              type="textarea"
+              v-model="editWorkInform.origin"
+            ></el-input>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click.native="editWorkVisible = false">取 消</el-button>
+          <el-button type="primary" @click="confirmEdit">确 定</el-button>
+        </span>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -105,14 +185,31 @@ export default {
   name: "workManage",
   data() {
     return {
-      editWorkInform:{},
-      editWorkVisible:false,
-      queryInfo: { //请求参数
+      dialogImageUrl: "",
+      dialogVisible: false,
+      disabled: false,
+      editWorkInform: {
+        id: 1,
+        author: "",
+        opusName: "",
+        opusIntroduce: "",
+        opusType: "",
+        opusTitle: "",
+        photo: "",
+        video: "",
+        createTime: "",
+        make: "",
+        history: "",
+        origin: "",
+      },
+      editWorkVisible: false,
+      queryInfo: {
+        //请求参数
         query: "",
         pageNum: 1,
         pageSize: 10,
       },
-      total:10,//数据总数
+      total: 10, //数据总数
       workList: [
         {
           id: 1,
@@ -284,39 +381,34 @@ export default {
     };
   },
   methods: {
-    goAddPage() {
-
-    },
+    goAdd() {},
     handleEdit(e) {
-      console.log()
-      this.editWorkInform = this
-      this.editWorkVisible = true
-      console.log(e)
+      this.editWorkInform = e;
+      this.editWorkVisible = true;
+    },
+    handleRemove(file) {
+      console.log(file);
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
     },
     async handleDelete() {
-        const result =  await this.$confirm('确定删除这个作品吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }).catch((err) => err)
-      if (result !== 'confirm') {
-        return this.$message.info('已取消删除操作！')
+      const result = await this.$confirm("确定删除这个作品吗？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).catch((err) => err);
+      if (result !== "confirm") {
+        return this.$message.info("已取消删除操作！");
       } else {
-        this.$store.dispatch('delete')
+        this.$store.dispatch("delete");
       }
     },
-    confirmEdit() {
-
-    },
-    editWorkClosed() {
-
-    },
-    handleSizeChange() {
-
-    },
-    handleCurrentChange() {
-
-    }
+    confirmEdit() {},
+    editWorkClosed() {},
+    handleSizeChange() {},
+    handleCurrentChange() {},
   },
 };
 </script>

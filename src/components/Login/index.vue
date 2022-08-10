@@ -34,7 +34,7 @@
                 ></el-input>
               </el-form-item>
               <el-form-item
-                prop="pass"
+                prop="password"
                 :rules="{
                   required: true,
                   message: '请输入密码',
@@ -45,7 +45,7 @@
                   type="password"
                   auto-complete="off"
                   placeholder="请输入密码"
-                  v-model="loginForm.pass"
+                  v-model="loginForm.password"
                 ></el-input>
               </el-form-item>
               <el-form-item
@@ -63,7 +63,7 @@
                   v-model="loginForm.code"
                 ></el-input>
                 <div class="coderight" @click="refreshCode">
-                  <SIdentify :identifyCode="identifyCode"></SIdentify>
+                  <SIdentify :identifyCode="this.$store.state.login.identifyCode"></SIdentify>
                 </div>
               </el-form-item>
               <el-form-item>
@@ -171,7 +171,7 @@ import SIdentify from "../SIdentify";
 export default {
   name: "loginPage",
   data() {
-    var validatePass = (rule, value, callback) => {
+    let validatePass = (rule, value, callback) => {
       if (value === "") {
         callback(new Error("请输入密码"));
       } else {
@@ -181,7 +181,7 @@ export default {
         callback();
       }
     };
-    var validatePass2 = (rule, value, callback) => {
+    let validatePass2 = (rule, value, callback) => {
       if (value === "") {
         callback(new Error("请再次输入密码"));
       } else if (value !== this.registerForm.pass) {
@@ -192,10 +192,9 @@ export default {
     };
     return {
       page: 0,
-      identifyCode: "",
       loginForm: {
         email: "",
-        pass: "",
+        password: "",
         code: "",
       },
       registerForm: {
@@ -221,7 +220,6 @@ export default {
       if (!login.contains(e.target) && !register.contains(e.target)) {
         this.$store.dispatch("showLogin");
       }
-      
     },
     login() {},
     refreshCode() {
@@ -230,21 +228,20 @@ export default {
     },
     getCode() {
       this.$store.dispatch("getCode"); //获取验证码
-      this.identifyCode = this.$store.state.login.identifyCode;
     },
     submitLogin() {
-      console.log(this.loginForm)
       this.$store.dispatch("login", this.loginForm);
     },
     goRegister() {
       this.page = 1;
     },
     goLogin() {
+      this.getCode();
       this.page = 0;
     },
     sendCode() {
       if (!this.timer) {
-         this.$message('发送成功!');
+        this.$message("发送成功!");
         this.timer = setInterval(() => {
           if (this.timeCount > 0) {
             this.timeCount--;
@@ -262,8 +259,7 @@ export default {
     },
   },
   mounted() {
-    this.identifyCode = "D336DL";
-    this.getCode();
+    this.$store.dispatch("getCode");
   },
   components: { SIdentify },
 };
@@ -366,36 +362,36 @@ export default {
   }
 }
 @keyframes slideIn {
-0% {
+  0% {
     -webkit-transform: translateZ(-800px) rotateY(90deg);
-            transform: translateZ(-800px) rotateY(90deg);
+    transform: translateZ(-800px) rotateY(90deg);
     opacity: 0;
   }
   54% {
     -webkit-transform: translateZ(-160px) rotateY(90deg);
-            transform: translateZ(-160px) rotateY(90deg);
+    transform: translateZ(-160px) rotateY(90deg);
     opacity: 1;
   }
   100% {
     -webkit-transform: translateZ(0) rotateY(0);
-            transform: translateZ(0) rotateY(0);
+    transform: translateZ(0) rotateY(0);
   }
 }
 
 @keyframes slideOut {
   0% {
     -webkit-transform: translateZ(0) rotateY(0);
-            transform: translateZ(0) rotateY(0);
+    transform: translateZ(0) rotateY(0);
     opacity: 1;
   }
   54% {
     -webkit-transform: translateZ(-160px) rotateY(90deg);
-            transform: translateZ(-160px) rotateY(90deg);
+    transform: translateZ(-160px) rotateY(90deg);
     opacity: 1;
   }
   100% {
     -webkit-transform: translateZ(-800px) rotateY(90deg);
-            transform: translateZ(-800px) rotateY(90deg);
+    transform: translateZ(-800px) rotateY(90deg);
     opacity: 0;
   }
 }
