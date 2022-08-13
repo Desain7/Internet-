@@ -20,25 +20,25 @@ export default new Router({
             name: 'Home',
             path: '/Home',
             component: Home,
-            meta: { showNav: true }
+            meta: { showNav: true , showFooter:true}
         },
         {
             name: 'Works',
             path: '/Works',
             component: Works,
-            meta: { showNav: true }
+            meta: { showNav: true , showFooter:true}
         },
         {
             name: 'Shop',
             path: '/Shop',
             component: Shop,
-            meta: { showNav: true }
+            meta: { showNav: true , showFooter:true}
         },
         {
             name: 'WorkInform',
             path: '/WorkInform',
             component: WorkInform,
-            meta: { showNav: true }
+            meta: { showNav: true , showFooter:true}
         },
         {
             name: 'BackStage',
@@ -75,13 +75,13 @@ export default new Router({
                     component:Video,
                 },
             ],
-            meta: { showNav: false }
+            meta: { showNav: false , showFooter:false}
         },
         {
             path: '/',
             redirect: '/Home',
             component: Home,
-            meta: { showNav: true }
+            meta: { showNav: true , showFooter:true}
         },
     ]
 })

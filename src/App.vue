@@ -2,12 +2,14 @@
   <div id="app">
     <myNavigation></myNavigation>
     <router-view></router-view>
+    <myFooter></myFooter>
     <loginRegister v-if="this.$store.state.login.showLogin"></loginRegister>
   </div>
 </template>
 
 <script>
 import myNavigation from "@/components/Header/index.vue";
+import myFooter from '@/components/Footer/index.vue';
 import loginRegister from "@/components/Login/index.vue";
 
 export default {
@@ -17,6 +19,7 @@ export default {
   },
   components: {
     myNavigation,
+    myFooter,
     loginRegister,
   },
 };

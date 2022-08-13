@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-card class="box-card" shadow="hover">
+    <el-card class="author-card" shadow="hover">
       <div slot="header" class="clearfix title">
         <span class="title">匠人志</span>
       </div>
@@ -8,7 +8,11 @@
         <div class="text item">
           <div class="works" v-for="o in 6" :key="o">
             <div class="avatar">
-                <el-avatar :size="120" :src="avatarUrl" class="craftsAvatar"></el-avatar>
+              <el-avatar
+                :size="120"
+                :src="avatarUrl"
+                class="craftsAvatar"
+              ></el-avatar>
             </div>
             <div class="describe">
               <div class="text">
@@ -26,24 +30,34 @@
 <script>
 export default {
   name: "craftsMan",
-    data() {
-        return {
-            avatarUrl:''
-        }
-    },
+  data() {
+    return {
+      avatarUrl: "",
+    };
+  },
   components: {},
 };
 </script>
 
 <style lang="scss">
-.box-card {
-  background-color:rgb(243,240,232);
+.author-card {
+  background-color: rgb(243, 240, 232);
   width: 90%;
   border-radius: 1rem;
   margin: 1rem auto;
+  &:hover {
+    .title {
+      span {
+        transform: rotate3d(0, 1, 0, 360deg);
+      }
+    }
+  }
   .title {
     span {
+      transition: 0.5s;
       float: left;
+      font-size: 1.5rem;
+      font-weight: 100;
     }
   }
   .content {
@@ -64,7 +78,7 @@ export default {
           height: 80%;
           margin: auto;
           display: flex;
-          .craftsAvatar{
+          .craftsAvatar {
             margin: auto;
           }
         }

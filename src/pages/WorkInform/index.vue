@@ -21,7 +21,9 @@
           </div>
           <div class="type">
             <span class="title">作者：</span>
-            <span class="content" style="cursor: pointer;">{{ workInform.author }}</span>
+            <span class="content" style="cursor: pointer">{{
+              workInform.author
+            }}</span>
           </div>
           <div class="type">
             <span class="title">创建时间：</span>
@@ -50,16 +52,93 @@
           {{ workInform.origin }}
         </div>
       </div>
+      <div class="workOperate">
+        <el-button round>点赞<i class="iconfont icon-good"></i></el-button>
+        <el-button round>收藏<i class="iconfont icon-favorites"></i></el-button>
+      </div>
     </div>
-    <div class="workComments"></div>
+    <div class="workComments">
+      <div class="title">︳评论</div>
+      <div class="commentInput">
+        <el-input
+          type="textarea"
+          :rows="3"
+          clearable
+          placeholder="留下你的评论吧!"
+          show-word-limit
+          maxlength="200"
+          v-model="commentInput"
+        >
+        </el-input>
+        <el-button type="primary" round>发布评论</el-button>
+      </div>
+      <div class="commentsContent">
+        <div
+          class="reply-wrap"
+          v-for="(item, index) in commentsInform"
+          :key="index"
+        >
+          <div class="user-face">
+            <a target="_blank">
+              <div class="avatar" style="transform: translate(0, -15px)">
+                <el-avatar
+                  :size="50"
+                  src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+                ></el-avatar>
+              </div>
+            </a>
+          </div>
+          <div class="con">
+            <div class="user">
+              <a
+                href=""
+                target="_black"
+                class="name"
+                style="text-decoration: none"
+              >
+                {{ item.email }}
+              </a>
+            </div>
+            <p class="text">
+              {{ item.comments }}
+            </p>
+            <div class="info">
+              <span class="time-location">
+                <span class="reply-time">
+                  {{ item.createTime }}
+                </span>
+              </span>
+              <div class="operation more-operation">
+                <div class="spot">
+                  <el-button type="text" @click="supportComment(item)">
+                    <i class="iconfont icon-good" v-if="!item.userSupport"></i>
+                    <i class="iconfont icon-good-fill" v-if="item.userSupport"></i>
+                    <div
+                      class="support"
+                      v-if="item.support"
+                      style="display: inline-block"
+                    >
+                      {{ item.support }}
+                    </div>
+                  </el-button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <el-divider></el-divider>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex';
 export default {
   name: "WorkInform",
   data() {
     return {
+      commentInput: "",
       workInform: {
         //当前作品信息
         id: 1,
@@ -79,10 +158,49 @@ export default {
         origin:
           "擂茶源自北宋，至今已有千年历史。从选料、制作、冲泡，都别具特色。关于擂茶的起源，相传三国时刘备率领军队过洞庭湖，军中将士染上一种怪病，一路上病倒数千人。队伍扶病行军勉强支撑到了桃花江，再也无力前进，刘备只得下令就地驻扎，并派人四处寻医问药。医方找来不少，但均不见效。一日，一位老翁路过刘备军营，见军中将士纪律严明，很受感动，便主动献出祖传秘方“三生汤”（即生米、生姜、生茶叶）。当地老百姓找一来陶钵和木棒，并按照老翁的配料和制作方法，把生米、生姜、生茶叶捣碎，冲上开水让将士们饮用。其效果果然十分灵验，有病的迅速康复，无病的不再感染。",
       },
-      commentsInform:{
-        
-      }
+      commentsInform: [
+        {
+          id: 4,
+          comments: "垃圾，什么狗屎东西",
+          email: "2369303335@qq.com",
+          opusId: 2,
+          support: 5,
+          createTime: "2022-07-13 17:31:55",
+        },
+        {
+          id: 2,
+          comments: "看起来真不错",
+          email: "1902317191@qq.com",
+          opusId: 2,
+          support: 1,
+          createTime: "2022-07-13 17:12:28",
+        },
+        {
+          id: 3,
+          comments: "垃圾，什么狗屎东西",
+          email: "2369303335@qq.com",
+          opusId: 2,
+          support: 0,
+          createTime: "2022-07-13 17:31:52",
+        },
+      ],
     };
+  },
+  computed:{
+    ...mapState({
+      inform: (state) => state.login.workInform
+    })
+  },
+  methods: {
+    supportComment(item) {
+      if (!item.userSupport) {
+        item.userSupport = true;
+        item.support++
+      } else {
+        console.log(123);
+        this.$message("您已经点过赞了！");
+      }
+    },
   },
 };
 </script>
@@ -140,11 +258,91 @@ export default {
       width: 700px;
       height: 400px;
     }
-    .workDescribe{
-      text-indent: 2em!important;
+    .workDescribe {
+      text-indent: 2em !important;
       font-size: 18px !important;
       margin: 2% 0;
-      line-height: 200%
+      line-height: 200%;
+    }
+  }
+  .workOperate {
+    width: 20%;
+    margin: 0 auto;
+  }
+}
+.workComments {
+  padding: 2%;
+  width: 70%;
+  min-height: 20vh;
+  background-color: rgb(250, 250, 250);
+  margin: auto;
+  .commentInput {
+    margin: 0 auto;
+    margin-top: 5%;
+    margin-bottom: 5%;
+    width: 80%;
+    .el-button {
+      margin-top: 2%;
+      float: right;
+    }
+  }
+  .title {
+    font-size: 1.5rem;
+    font-weight: 200;
+  }
+  .commentsContent {
+    width: 90%;
+    margin: auto;
+    margin-top: 10%;
+    .reply-wrap {
+      .user-face {
+        display: inline-block;
+        position: absolute;
+      }
+      .con {
+        margin-left: 6%;
+        width: 94%;
+        display: inline-block;
+        .text {
+          min-height: 2rem;
+        }
+        .user {
+          a {
+            outline: none;
+            color: #6d757a;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            line-height: 1rem;
+            word-wrap: break-word;
+          }
+        }
+        .info {
+          color: #99a2aa;
+          line-height: 14px;
+          margin-top: 6px;
+          font-size: 12px;
+          .operation {
+            display: inline-block;
+            margin-left: 2%;
+            .spot {
+              .el-button {
+                padding: 0;
+                span {
+                  display: flex;
+                  i {
+                    font-size: 1.5rem;
+                  }
+                  .support {
+                    margin: auto 0;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
