@@ -169,7 +169,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
 import SIdentify from "../SIdentify";
 export default {
   name: "loginPage",
