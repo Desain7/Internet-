@@ -2,7 +2,7 @@
   <div v-if="$route.meta.showNav" class="mainIndex">
     <el-row :gutter="8">
       <el-col :span="2">
-        <div class="title">
+        <div class="title" @click="goHomePage">
           <el-image
             :src="require('../../assets/title.png')"
             fit="contain"
@@ -38,15 +38,36 @@
         <div class="block">
           <el-dropdown>
             <span class="el-dropdown-link avatarLink">
-              <el-avatar :size="50" :src="avatarUrl"></el-avatar>
+              <el-avatar
+                :size="50"
+                :src="avatarUrl"
+                @click.native="goUserPage"
+              ></el-avatar>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>我的主页</el-dropdown-item>
-              <el-dropdown-item @click.native="goBackStage"
+              <el-dropdown-item
+                @click.native="goUserPage"
+                v-if="this.$store.state.login.userdata"
+                >我的主页</el-dropdown-item
+              >
+              <el-dropdown-item
+                @click.native="goBackStage"
+                v-if="this.$store.state.login.userdata?.role == 'admin'"
                 >管理后台</el-dropdown-item
               >
-              <el-dropdown-item divided @click.native="goLogin">
+              <el-dropdown-item
+                divided
+                @click.native="goLogin"
+                v-if="!this.$store.state.login.userdata"
+              >
                 登录/注册
+              </el-dropdown-item>
+              <el-dropdown-item
+                divided
+                @click.native="exitLogin"
+                v-if="this.$store.state.login.userdata"
+              >
+                退出登录
               </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
@@ -57,6 +78,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
   name: "myNavigation",
   data() {
@@ -68,18 +90,40 @@ export default {
         { navName: "商城", navRouter: "Shop" },
       ],
       searchInput: "",
-      avatarUrl: "",
     };
   },
+  computed: {
+    ...mapState({
+      avatarUrl: (state) => state.user.userData.headPicture || "",
+      isLogin: (state) => state.login.isLogin,
+    }),
+  },
+  watch: {
+    isLogin(n) {
+      if (n == 1) {
+        this.$message({
+          type: "success",
+          message: "登陆成功!",
+        });
+        this.$store.dispatch("getUserData", {
+          email: this.$store.state.login.userdata.email,
+        });
+      }
+    },
+  },
   methods: {
+    goHomePage() {
+      this.$router.push({ name: "Home" });
+    },
     checkLogin() {
       if (this.getLocalData("user")) {
         this.$message({
           type: "success",
-          message: this.$store.login.userData.webName,
+          message: this.$store.state.login.userdata.webName,
         });
-      } else {
-        this.pleaseLogin()
+        this.$store.dispatch("getUserData", {
+          email: this.$store.state.login.userdata.email,
+        });
       }
     },
     getLocalData(key) {
@@ -89,6 +133,7 @@ export default {
       if (storageTimestamp && timestamp - storageTimestamp < expires) {
         let inform = localStorage.getItem(`feiyi${key}`); // 从缓存中拿到数据给程序使用
         this.$store.state.login[`${key}data`] = JSON.parse(inform);
+        this.$store.state.login.isLogin = 1;
         return true;
       }
       return false;
@@ -99,14 +144,19 @@ export default {
     },
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
-      this.checkLogin()
-      
     },
     goLogin() {
       this.$store.dispatch("showLogin");
     },
     goBackStage() {
       this.$router.push("/BackStage");
+    },
+    goUserPage() {
+      if (this.$store.state.login.userdata) {
+        this.$router.push("/User");
+      } else {
+        this.pleaseLogin();
+      }
     },
     goSearch() {
       this.activeIndex = "Works";
@@ -116,10 +166,21 @@ export default {
       };
       this.$router.push(location);
     },
+    exitLogin() {
+      localStorage.removeItem("feiyiuser");
+      localStorage.removeItem("userTimestamp");
+      this.$store.state.login.userdata = {};
+      this.$store.state.login.isLogin = 0;
+      this.$message({
+        message: "退出登录成功！",
+      });
+      this.$router.push("/Home");
+      location.reload();
+    },
   },
   mounted() {
     this.activeIndex = this.$router.currentRoute.name;
-    this.checkLogin()
+    this.checkLogin();
   },
 };
 </script>
@@ -148,6 +209,7 @@ export default {
       }
       .title {
         display: flex;
+        cursor: pointer;
       }
       .block {
         margin-top: 5%;

@@ -11,6 +11,7 @@ request.interceptors.request.use((config) => {
     nprogress.start()
     if (localStorage.getItem('feiyiuser')){
         let user = localStorage.getItem('feiyiuser')
+        user = JSON.parse(user)
         config.headers.token = user.token
     }
     return config

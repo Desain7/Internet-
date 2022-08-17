@@ -34,27 +34,22 @@ export const reqValidateCode = (params) => request({
     method:'post',
     params:params,
 })
-export const reqUploadAvatar = (params) => request({
-    url:'/user/uploadHead',
-    method:'post',
-    params:params,
-})
-export const reqUpdateUser = (params) => request({
+export const reqUpdateUser = (data) => request({
     url:'/user/update',
     method:'post',
-    params:params,
+    data:data,
 })
 export const reqUserInfo = (query) => request({
     url:'/user/getByEmail',
     method:'get',
-    query:query,
+    params:query,
 })
 
 //#endregion
 
 //作品相关请求
 //#region 
-export const reqWorksList = () =>  request({url:"/opus/opusList", method:"get"})
+export const reqWorksList = (query) =>  request({url:"/opus/opusList", method:"get", query:query})
 
 export const reqAuthorWork = () =>  request({url:"/opus/list/1", method:"get"})
 
@@ -120,10 +115,10 @@ export const reqCommentsList = (query) => request({
     method:'get',
     query:query
 })
-export const reqComment = (query) => request({
+export const reqComment = (params) => request({
     url:'/comments',
     method:'get',
-    query:query
+    params:params
 })
 export const reqDeleteComment = (query) => request({
     url:'/comments/delete/1',

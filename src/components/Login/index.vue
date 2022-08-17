@@ -63,7 +63,9 @@
                   v-model="loginForm.code"
                 ></el-input>
                 <div class="coderight" @click="refreshCode">
-                  <SIdentify :identifyCode="this.$store.state.login.identifyCode"></SIdentify>
+                  <SIdentify
+                    :identifyCode="this.$store.state.login.identifyCode"
+                  ></SIdentify>
                 </div>
               </el-form-item>
               <el-form-item>
@@ -167,6 +169,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import SIdentify from "../SIdentify";
 export default {
   name: "loginPage",
@@ -213,6 +216,7 @@ export default {
       isDisabled: false,
     };
   },
+
   methods: {
     hide(e) {
       let login = this.$refs.login;
@@ -231,6 +235,7 @@ export default {
     },
     submitLogin() {
       this.$store.dispatch("login", this.loginForm);
+
     },
     goRegister() {
       this.page = 1;

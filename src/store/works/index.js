@@ -15,12 +15,14 @@ export default{
     mutations:{
         WORKSLIST(state, worksList) {
             state.worksList = worksList
-            console.log(worksList)
         },
         SEARCHWORK(state, searchWork) {
             state.searchWork = searchWork
         },
         WORKINFORM(state, workInform) {
+            state.workInform = workInform
+        },
+        GETINFORM(state, workInform) {
             state.workInform = workInform
         },
         COLLECTIONLIST(state, collectionList) {
@@ -31,8 +33,8 @@ export default{
         }
     },
     actions:{
-        async worksList({commit}) {
-            let res = await reqWorksList()
+        async worksList({commit}, query) {
+            let res = await reqWorksList(query)
             if (res.code == 200) {
                 commit("WORKSLIST", res.data)
             }
@@ -46,8 +48,13 @@ export default{
         async workInform({commit}, params) {
             let res = await reqWorkInform(params)
             if(res.code == 200) {
+                sessionStorage.setItem('workInform',JSON.stringify(res.data))
                 commit('WORKINFORM', res.data)
             }
+        },
+        getInform({commit}) {
+            let res = JSON.parse(sessionStorage.getItem('workInform')) 
+            commit('GETINFORM',res)
         },
         async CollectionList({commit}, query) {
             let res = await reqCollectionList(query)

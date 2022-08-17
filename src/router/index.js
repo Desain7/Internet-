@@ -5,6 +5,8 @@ import Shop from '../pages/Shop/index.vue'
 import Works from '../pages/Works/index.vue'
 import WorkInform from '../pages/WorkInform/index.vue'
 import BackStage from '../pages/BackStage/index.vue'
+import User from '../pages/Personal/index.vue'
+
 
 import Work from '../pages/BackStage/Work/index.vue'
 import Worker from '../pages/BackStage/Worker/index.vue'
@@ -76,6 +78,12 @@ export default new Router({
                 },
             ],
             meta: { showNav: false , showFooter:false}
+        },
+        {
+            name:'User',
+            path:'/User',
+            component:User,
+            meta:{showNav:true, showFooter:false}
         },
         {
             path: '/',

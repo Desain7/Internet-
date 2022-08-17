@@ -1,16 +1,16 @@
 <template>
   <div class="work-card">
-    <el-card class="work-box-card" @click.native="goInform()">
+    <el-card class="work-box-card">
       <div class="left">
         <el-image
-          style="width: 80%; height: 80%"
-          src="https://feiyi-141.oss-cn-hangzhou.aliyuncs.com/2022-07-18/bf9d7f1d876d416e8075a6d7a2130901.jpg"
+          style="width: 80%; height: 80%;  border-radius: 0.5rem;"
+          :src="work.photos[0]?.url"
           fit="cover"
         ></el-image>
       </div>
       <div class="right">
         <div class="text">
-          <div class="title">赣州擂茶{{ work.name }}</div>
+          <div class="title">{{ work.opusTitle }}</div>
           <div v-if="false">作者:{{ work.author }}</div>
           <div>{{ work.opusType }}</div>
           <div>{{ work.opusIntroduce }}</div>
@@ -39,12 +39,7 @@ export default {
   },
   props: ["work"],
   methods: {
-    goInform(item) {
-      let location = { name: "WorkInform", params: "" };
-      this.$router.push(location);
-      console.log(item);
-      console.log(123123123123);
-    },
+
   },
 };
 </script>
@@ -66,7 +61,6 @@ export default {
       display: flex;
       flex-direction: row;
       height: 90%;
-
       .left {
         width: 10rem;
         margin-right: 10%;

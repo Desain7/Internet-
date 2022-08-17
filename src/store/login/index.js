@@ -6,9 +6,10 @@ Vue.use(Vuex)
 
 export default {
     state: {
+        isLogin:0,
         showLogin: false,
         identifyCode:'',
-        userData:{}
+        userdata:null
     },
     mutations: {
         SHOWLOGIN(state) {
@@ -18,7 +19,8 @@ export default {
             state.identifyCode = identifyCode
         },
         LOGIN(state, loginData) {
-            state.loginData = loginData
+            state.userdata = loginData
+            state.isLogin = 1
             localStorage.setItem('feiyiuser', JSON.stringify(loginData))
             localStorage.setItem(`userTimestamp`, Date.now()); 
         }
@@ -39,11 +41,8 @@ export default {
             let res = await login(params)
 
             if(res.code == 200) {
+                commit("SHOWLOGIN")
                 commit('LOGIN',res.data)
-                this.$message({
-                    message: `[登陆成功]${res.data.webName}`,
-                    type: 'success'
-                  });
             }
         }
     },

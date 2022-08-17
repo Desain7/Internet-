@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="$route.meta.showFooter">
         <div class="footerContainer">
             <div class="footer">
 
@@ -16,11 +16,11 @@ export default {
 
 <style lang="scss" scoped>
     .footerContainer{
-        width: 95%;
+        width: 80%;
         margin: 0 auto;
         height: 10rem;
         margin-top: 5%;
-        background-color: #bfc;
+        background-color: #fff;
         .footer{
 
         }
