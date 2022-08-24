@@ -1,7 +1,7 @@
 <template>
   <div class="sideNav">
     <el-menu
-      default-active="work"
+      default-active="/BackStage/work"
       class="navBar"
       background-color="rgb(14,23,49)"
       text-color="#fff"
@@ -40,10 +40,10 @@ export default {
     return {
       activeIndex: "work",
       navIndex: [
-        { navName: "作品管理", navRouter: "work" },
-        { navName: "评论管理", navRouter: "comments" },
-        { navName: "作者管理", navRouter: "worker" },
-        { navName: "视频管理", navRouter: "video" },
+        { navName: "作品管理", navRouter: "/BackStage/work" },
+        { navName: "评论管理", navRouter: "/BackStage/comments" },
+        { navName: "作者管理", navRouter: "/BackStage/worker" },
+        { navName: "视频管理", navRouter: "/BackStage/video" },
       ],
     };
   },

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <categoryCard></categoryCard>
     <div class="goodsCardContainer">
       <goodsCard></goodsCard>
       <goodsCard></goodsCard>
@@ -15,10 +14,9 @@
 
 <script>
 import goodsCard from "./goodsCard/index.vue";
-import categoryCard from "@/components/Category/index.vue";
 export default {
   name: "shopPage",
-  components: { goodsCard, categoryCard },
+  components: { goodsCard},
 };
 </script>
 

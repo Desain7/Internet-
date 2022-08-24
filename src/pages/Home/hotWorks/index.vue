@@ -6,16 +6,15 @@
       </div>
       <div class="content">
         <div class="text item">
-          <div class="works" v-for="o in 3" :key="o">
-            <div class="picture">
+          <div
+            class="works"
+            v-for="item in hotWorks.slice(0, 3)"
+            :key="item.id + '$'"
+          >
+            <div class="picture" @click="goInform(item)">
               <div class="img">
-                <el-image
-                  style="width: 100%; height: 100%"
-                  src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20180516%2F190e80b9241f4971818904afc539ccaf.jpeg&refer=http%3A%2F%2F5b0988e595225.cdn.sohucs.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1662798531&t=264ed6ef9c93b0113c88b6d2eb75d962"
-                  fit="cover"
-                >
-                </el-image>
-                <div class="title">我是标题{{ name }}</div>
+                <el-image :src="item.photos[1]?.url" fit="cover"> </el-image>
+                <div class="title">{{ item.opusTitle }}</div>
               </div>
             </div>
             <!-- <div class="describe">
@@ -32,10 +31,27 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
   name: "hotWorks",
-
-  components: {},
+  computed: {
+    ...mapState({
+      hotWorks: (state) => state.works.hotWorks,
+    }),
+  },
+  methods: {
+    goInform(item) {
+      let params = {
+        pageSize: 1,
+        pageNo: 1,
+        opusId: item.id,
+        email: this.$store.state.login.userdata?.email || "",
+      };
+      this.$store.dispatch("workInform", params);
+      let location = { name: "WorkInform", params: params };
+      this.$router.push(location);
+    },
+  },
 };
 </script>
 
@@ -82,7 +98,7 @@ export default {
           background-color: #fff;
           position: relative;
           transition: 1s;
-          &:hover{
+          &:hover {
             border: 1px #000 solid;
           }
           .img {
@@ -92,7 +108,7 @@ export default {
             cursor: pointer;
             &:hover {
               transform: scale(1.5);
-              
+
               .title {
                 opacity: 1;
                 display: block;
@@ -105,7 +121,7 @@ export default {
               left: 50%;
               transform: translate(-250%, -50%);
               font-size: 25px;
-              text-shadow: #fff 1px 1px;
+              text-shadow: #fff -1px -1px;
               opacity: 0;
               transition: 1s;
             }

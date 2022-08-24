@@ -169,6 +169,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import SIdentify from "../SIdentify";
 export default {
   name: "loginPage",
@@ -215,8 +216,24 @@ export default {
       isDisabled: false,
     };
   },
-
+  computed:{
+    ...mapState({
+      errMsg:state => state.login.errorMessage
+    })
+  },
+  watch:{
+    errMsg(n) {
+      if(n != '') {
+        this.$message({
+          type:'error',
+          message:`[登陆失败] ${n}`
+        })
+        this.$store.state.login.errorMessage = ''
+      }
+    }
+  },
   methods: {
+    //点击遮罩层关闭窗口
     hide(e) {
       let login = this.$refs.login;
       let register = this.$refs.register;
@@ -234,7 +251,22 @@ export default {
     },
     submitLogin() {
       this.$store.dispatch("login", this.loginForm);
-
+    },
+    //点击注册按钮提交
+    submitRegister() {
+      if (this.registerForm.pass == this.registerForm.pass) {
+        let register = {
+          email:this.registerForm.email,
+          password:this.registerForm.pass,
+          yzm:this.registerForm.code
+        }
+        this.$store.dispatch("register", register);
+      } else {
+        this.$message({
+          type: "error",
+          message: "两次密码输入不一致!",
+        });
+      }
     },
     goRegister() {
       this.page = 1;

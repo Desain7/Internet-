@@ -14,11 +14,7 @@
             </el-upload>
           </div>
 
-          <img
-            class="avatarImg"
-            :src="userInfo.headPicture"
-            alt=""
-          />
+          <img class="avatarImg" :src="userInfo.headPicture" alt="" />
         </div>
         <div class="userInfo">
           <div class="mainInfo">
@@ -28,14 +24,27 @@
               <div class="sex">{{ userInfo.sex }}</div>
             </div>
             <div class="con2">
-              <div class="email">{{ userInfo.email }}</div>
               <div class="address">{{ userInfo.address }}</div>
-              <div class="phone">{{ userInfo.phone }}</div>
             </div>
           </div>
         </div>
       </div>
-      <div class="content"></div>
+      <div class="userContent">
+        <div class="leftContent">
+          <el-menu
+            default-active="/User/info"
+            class="el-menu-vertical-demo"
+            router
+          >
+            <el-menu-item  v-for="(item, index) in navIndex" :key="index" :index="item.navRouter">
+              <i :class="item.navIcon"></i>
+              <span slot="title">{{item.navName}}</span>
+            </el-menu-item>
+          </el-menu>
+        </div>
+          <router-view></router-view>
+
+      </div>
     </div>
   </div>
 </template>
@@ -46,32 +55,33 @@ export default {
   name: "myPage",
   data() {
     return {
-      // userInfo: {
-      //   id: 1,
-      //   email: "2369303335@qq.com",
-      //   name: "张三",
-      //   age: 20,
-      //   sex: "男",
-      //   address: "南昌市江西农业大学东区",
-      //   headPicture: "",
-      //   phone: "15870720927",
-      // },
+      navIndex: [
+        { navName: "个人资料", navIcon:'el-icon-user-solid', navRouter: "/User/info" },
+        { navName: "喜欢", navIcon:'el-icon-s-grid', navRouter: "/User/favor" },
+        { navName: "收藏", navIcon:'el-icon-star-on', navRouter: "/User/collect" },
+      ],
     };
   },
   methods: {
-    beforeAvatarUpload(file){
-       const isLt2M = file.size / 1024 / 1024 < 2;
-       if (!isLt2M) {
-          this.$message.error('上传头像图片大小不能超过 2MB!');
+    beforeAvatarUpload(file) {
+      const isLt2M = file.size / 1024 / 1024 < 2;
+       const isJPG = file.type === 'image/jpeg';
+       const isPNG = file.type === 'image/png';
+      if (!isLt2M) {
+        this.$message.error("上传头像图片大小不能超过 2MB!");
+      }
+      if (!isJPG && !isPNG) {
+          this.$message.error('上传头像图片只能是 JPG 或 PNG 格式!');
         }
-        return isLt2M;
+      return isLt2M && (isJPG || isPNG);
     },
-    handleAvatarSuccess(res){
-      let avatarChange = this.userInfo
-      avatarChange.headPicture = res.data
-      console.log(avatarChange)
-      this.$store.dispatch('chageUserInfo', avatarChange)
-    }
+    handleAvatarSuccess(res) {
+      let avatarChange = this.userInfo;
+      avatarChange.headPicture = res.data;
+      console.log(123,avatarChange);
+      console.log(456,res.data);
+      this.$store.dispatch("chageUserInfo", avatarChange);
+    },
   },
   computed: {
     ...mapState({
@@ -87,22 +97,26 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$border-color:rgb(241,243,244);
 .userCard {
   width: 80%;
   height: 95vh;
   margin: auto;
-  background-color: #bfc;
+  background-color: #fff;
   .head {
     width: 100%;
     height: 20%;
     display: flex;
     background-color: #fff;
+    border-bottom: $border-color 1px solid;
     .avatar {
-      height: 80%;
+      height: 8rem;
+      width: 8rem;
       margin: auto 0;
       margin-left: 5%;
       display: flex;
       border-radius: 50%;
+      border: 1px rgba(0, 0, 0, 0.3) solid;
       position: relative;
       overflow: hidden;
       cursor: pointer;
@@ -134,6 +148,7 @@ export default {
       .avatarImg {
         margin: auto;
         height: 100%;
+        width: 100%;
         border-radius: 50%;
       }
     }
@@ -163,6 +178,17 @@ export default {
           }
         }
       }
+    }
+  }
+  .userContent{
+    height: 80%;
+    .leftContent{
+      height: 100%;
+      width: 10%;
+      background-color: #fff;
+      overflow: hidden;
+      display: inline-block;
+      border-right: $border-color solid 1px;
     }
   }
 }

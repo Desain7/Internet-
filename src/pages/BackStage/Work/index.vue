@@ -1,28 +1,40 @@
 <template>
   <div class="work">
     <div class="workManage">
-      <el-card>
-        <!-- gutter来设置行内列之间的距离 -->
+      <el-card v-if="!isAdd">
+        <!-- gutter设置行内列之间的距离 -->
         <el-row :gutter="20">
           <el-col :span="8">
-            <el-input placeholder="请输入内容" clearable>
-              <el-button slot="append" icon="el-icon-search"></el-button>
+            <el-input placeholder="请输入内容" clearable v-model="searchInput">
+              <el-button
+                slot="append"
+                icon="el-icon-search"
+                @click="handleSearch"
+              ></el-button>
             </el-input>
           </el-col>
-          <el-col :span="4">
+          <el-col :span="2">
             <el-button type="primary" @click="goAdd">添加作品</el-button>
           </el-col>
+          <el-col :span="2">
+            <el-button type="danger" @click="selectDelete">批量删除</el-button>
+          </el-col>
         </el-row>
-        <el-table :data="workList" style="width: 100%" height="string">
+        <el-table :data="worksList" style="width: 100%" ref="worksTable">
           <el-table-column type="selection" width="55"> </el-table-column>
           <el-table-column prop="opusName" label="作品名称" width="100px">
           </el-table-column>
-          <el-table-column prop="id" label="作品ID" width="80px">
+          <el-table-column
+            prop="id"
+            label="作品ID"
+            width="90px"
+            :sortable="true"
+          >
           </el-table-column>
           <el-table-column
             prop="opusIntroduce"
             label="作品简介"
-            width="400px"
+            width="350px"
             :show-overflow-tooltip="true"
           >
           </el-table-column>
@@ -43,9 +55,14 @@
           <el-table-column prop="opusType" label="作品分类" width="100px">
           </el-table-column>
 
-          <el-table-column prop="author" label="作者" width="100px">
+          <el-table-column prop="opusTitle" label="标题" width="100px">
           </el-table-column>
-          <el-table-column label="创建时间" width="120px" prop="createTime">
+          <el-table-column
+            label="创建时间"
+            width="150px"
+            prop="createTime"
+            :sortable="true"
+          >
           </el-table-column>
           <el-table-column label="操作" width="120px">
             <template slot-scope="scope">
@@ -59,7 +76,7 @@
                 type="danger"
                 icon="el-icon-delete"
                 size="mini"
-                @click="handleDelete"
+                @click="handleDelete(scope.row)"
               ></el-button>
             </template>
           </el-table-column>
@@ -77,6 +94,195 @@
         >
         </el-pagination>
       </el-card>
+      <el-card v-if="isAdd">
+        <!-- 提示区 -->
+        <el-alert
+          title="添加作品信息"
+          type="info"
+          center
+          show-icon
+          :closable="false"
+        >
+        </el-alert>
+        <!-- 进度条 为让steps和tab-pane实现一一对应联动，都绑定上了activeIndex，但steps这里要的是数字类型，所以最简单来-0处理-->
+        <el-steps
+          :space="200"
+          :active="activeIndex - 0"
+          finish-status="success"
+          align-center
+        >
+          <el-step title="基本信息"></el-step>
+          <el-step title="作品描述"></el-step>
+          <el-step title="作者信息"></el-step>
+          <el-step title="作品图片"></el-step>
+          <el-step title="作品视频"></el-step>
+          <el-step title="完成"></el-step>
+        </el-steps>
+        <!-- label-position-top让标签在输入框上面 -->
+        <el-form
+          :model="addWorksForm"
+          status-icon
+          ref="addWorksFormRef"
+          label-width="100px"
+          label-position="top"
+        >
+          <!-- v-model绑定的是被激活的tab-pane的name属性 tab-pane被激活的name更新给activeIndex,activeIndex又更新给steps,实现联动-->
+          <!-- 只不过tab-pane的name值期望是字符串类型，但el-steps的active想要的是数值类型，所以el-steps在取值时要转换下类型 -->
+          <el-tabs
+            tab-position="left"
+            style="height: auto"
+            v-model="activeIndex"
+            @tab-click="tabClick"
+          >
+            <!-- el-tab-pane只允许做el-tabs的子节点,所以form表单得在外面-->
+            <el-tab-pane label="基本信息" name="0" :disabled="activeIndex > 1">
+              <el-form-item label="作品名称" prop="opusName" :required="true">
+                <el-input v-model="addWorksForm.opusName"></el-input>
+              </el-form-item>
+              <el-form-item label="作品标题" prop="opusTitle" :required="true">
+                <el-input v-model="addWorksForm.opusTitle"></el-input>
+              </el-form-item>
+              <el-form-item label="作品类型" prop="opusType" :required="true">
+                <el-select v-model="addWorksForm.opusType">
+                  <el-option label="手工艺" value="手工艺"></el-option>
+                  <el-option label="戏曲文化" value="戏曲文化"></el-option>
+                  <el-option label="民间文化" value="民间文化"></el-option>
+                  <el-option label="其他" value="其他"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-button style="float: right" @click="closeAdd">取消</el-button>
+              <el-button style="float: right" type="primary" @click="nextIndex"
+                >下一步</el-button
+              >
+            </el-tab-pane>
+            <el-tab-pane
+              label="作品描述"
+              name="1"
+              :disabled="activeIndex > 1 || activeIndex != 1"
+            >
+              <el-form-item label="作品介绍" :required="true">
+                <el-input
+                  type="textarea"
+                  autosize
+                  v-model="addWorksForm.opusIntroduce"
+                ></el-input>
+              </el-form-item>
+              <el-form-item label="历史" :required="true">
+                <el-input
+                  type="textarea"
+                  autosize
+                  v-model="addWorksForm.history"
+                ></el-input>
+              </el-form-item>
+              <el-form-item label="制作">
+                <el-input
+                  type="textarea"
+                  autosize
+                  v-model="addWorksForm.make"
+                ></el-input>
+              </el-form-item>
+              <el-form-item label="起源">
+                <el-input
+                  type="textarea"
+                  autosize
+                  v-model="addWorksForm.origin"
+                ></el-input>
+              </el-form-item>
+              <el-button style="float: right" @click="closeAdd">取消</el-button>
+              <el-button style="float: right" type="primary" @click="nextIndex"
+                >下一步</el-button
+              >
+            </el-tab-pane>
+            <el-tab-pane label="作者信息" name="2" :disabled="activeIndex != 2">
+              <el-form-item label="作者" prop="name">
+                <el-input v-model="addAuthorForm.name"></el-input>
+              </el-form-item>
+              <el-form-item label="头像" prop="avatar">
+                <div class="avatar">
+                  <div class="avatarCover">
+                    <el-upload
+                      action="/api/user/uploadHead"
+                      :show-file-list="false"
+                      :on-success="handleAvatarSuccess"
+                      :before-upload="beforeAvatarUpload"
+                    >
+                      <span> 更换头像 </span>
+                    </el-upload>
+                  </div>
+
+                  <img class="avatarImg" :src="addAuthorForm.photos" alt="" />
+                </div>
+              </el-form-item>
+              <el-form-item label="性别">
+                <el-select v-model="addAuthorForm.sex">
+                  <el-option label="男" value="男"></el-option>
+                  <el-option label="女" value="女"></el-option>
+                  <el-option label="其他" value="其他"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item
+                label="年龄"
+                prop="age"
+                :rules="[{ type: 'number', message: '年龄必须为数字值' }]"
+              >
+                <el-input v-model.number="addAuthorForm.age"></el-input>
+              </el-form-item>
+              <el-button style="float: right" @click="closeAdd">取消</el-button>
+              <el-button style="float: right" type="primary" @click="nextIndex"
+                >下一步</el-button
+              >
+            </el-tab-pane>
+            <el-tab-pane label="作品图片" name="3" :disabled="activeIndex != 3">
+              <el-form-item label="图片">
+                <img
+                  class="pictureLi"
+                  v-for="(item, index) in addWorksForm.photos"
+                  :key="index"
+                  :src="item.url"
+                />
+                <el-upload
+                  ref="photoUpload"
+                  action="/api/opusPhoto/upload"
+                  list-type="picture-card"
+                  :auto-upload="false"
+                  :data="{ opusId: workId }"
+                  style="display: inline-block"
+                  :on-success="uploadFirstPictureSuccess"
+                  :before-upload="beforePictureUpload"
+                >
+                  <i slot="default" class="el-icon-plus"></i>
+                  <div slot="file" slot-scope="{ file }">
+                    <span class="el-upload-list__item-actions">
+                      <span
+                        class="el-upload-list__item-preview"
+                        @click="handlePictureCardPreview(file)"
+                      >
+                        <i class="el-icon-zoom-in"></i>
+                      </span>
+                      <span
+                        v-if="!disabled"
+                        class="el-upload-list__item-delete"
+                        @click="handleRemove(file)"
+                      >
+                        <i class="el-icon-delete"></i>
+                      </span>
+                    </span>
+                  </div>
+                </el-upload>
+              </el-form-item>
+              <el-button style="float: right" @click="closeAdd">取消</el-button>
+              <el-button style="float: right" type="primary" @click="nextIndex"
+                >下一步</el-button
+              >
+            </el-tab-pane>
+            <el-tab-pane label="作品视频" name="4" :disabled="activeIndex != 4">
+              <el-button type="primary" @click="completeAdd" class="saveWork"
+                >保存作品</el-button
+              >
+            </el-tab-pane>
+          </el-tabs>
+        </el-form>
+      </el-card>
       <el-dialog
         title="编辑作品"
         :visible.sync="editWorkVisible"
@@ -86,28 +292,58 @@
       >
         <el-form :model="editWorkInform" label-width="100px">
           <el-form-item label="作品id">
-            <el-input v-model="editWorkInform.id"></el-input>
+            <el-input v-model="editWorkInform.id" disabled></el-input>
           </el-form-item>
           <el-form-item label="作品名称">
             <el-input v-model="editWorkInform.opusName"></el-input>
           </el-form-item>
-          <el-form-item label="作者">
-            <el-input v-model="editWorkInform.author"></el-input>
-          </el-form-item>
           <el-form-item label="作品介绍">
             <el-input
               type="textarea"
+              autosize
               v-model="editWorkInform.opusIntroduce"
             ></el-input>
           </el-form-item>
           <el-form-item label="作品类型">
-            <el-input v-model="editWorkInform.opusType"></el-input>
+            <el-select v-model="editWorkInform.opusType">
+              <el-option label="手工艺" value="手工艺"></el-option>
+              <el-option label="戏曲文化" value="戏曲文化"></el-option>
+              <el-option label="民间文化" value="民间文化"></el-option>
+              <el-option label="其他" value="其他"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="作品标题">
             <el-input v-model="editWorkInform.opusTitle"></el-input>
           </el-form-item>
-          <el-form-item label="图片资源">
-            <el-upload action="#" list-type="picture-card" :auto-upload="false">
+          <el-form-item label="作品主图">
+            <el-image class="pictureLi" :src="editWorkInform.photo" :preview-src-list="[editWorkInform.photo]"/>
+          </el-form-item>
+          <el-form-item label="图片">
+            <div
+              class="picture"
+              v-for="(item, index) in editWorkInform.photos"
+              :key="index"
+            >
+              <el-image class="pictureLi" :src="item.url"/>
+              <div class="handle">
+                <span @click="editWorkInform.photo = item.url"
+                  ><i class="el-icon-check"></i>设为主图</span
+                >
+                <span @click="deletePhoto(item.id)"
+                  ><i class="el-icon-delete"></i>删除</span
+                >
+              </div>
+            </div>
+            <el-upload
+              ref="photoUpload"
+              action="/api/opusPhoto/upload"
+              list-type="picture-card"
+              :auto-upload="false"
+              :data="{ opusId: editWorkInform.id }"
+              style="display: inline-block"
+              :on-success="uploadPictureSuccess"
+              :before-upload="beforePictureUpload"
+            >
               <i slot="default" class="el-icon-plus"></i>
               <div slot="file" slot-scope="{ file }">
                 <img
@@ -132,41 +368,41 @@
                 </span>
               </div>
             </el-upload>
-            <el-dialog :visible.sync="dialogVisible">
-              <img width="100%" :src="dialogImageUrl" alt="" />
-            </el-dialog>
           </el-form-item>
           <el-form-item label="视频资源">
             <el-upload
-              class="upload-demo"
-              action="https://jsonplaceholder.typicode.com/posts/"
-              :on-preview="handlePreview"
-              :on-remove="handleRemove"
-              :before-remove="beforeRemove"
+              class="upload-video"
+              action="/api/vod/uploadVideo"
+              :on-success="uploadVideoSuccess"
+              :before-upload="beforeVideoUpload"
               multiple
-              :limit="3"
-              :on-exceed="handleExceed"
-              :file-list="fileList"
+              :limit="1"
             >
               <el-button size="small" type="primary">点击上传</el-button>
               <div slot="tip" class="el-upload__tip"></div>
             </el-upload>
           </el-form-item>
           <el-form-item label="创建时间">
-            <el-input v-model="editWorkInform.createTime"></el-input>
+            <el-input v-model="editWorkInform.createTime" disabled></el-input>
           </el-form-item>
           <el-form-item label="历史">
             <el-input
               type="textarea"
+              autosize
               v-model="editWorkInform.history"
             ></el-input>
           </el-form-item>
           <el-form-item label="制作">
-            <el-input type="textarea" v-model="editWorkInform.make"></el-input>
+            <el-input
+              type="textarea"
+              autosize
+              v-model="editWorkInform.make"
+            ></el-input>
           </el-form-item>
           <el-form-item label="起源">
             <el-input
               type="textarea"
+              autosize
               v-model="editWorkInform.origin"
             ></el-input>
           </el-form-item>
@@ -181,27 +417,20 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
   name: "workManage",
   data() {
     return {
+      activeIndex: "0",
+      isAdd: false,
+      searchInput: "",
       dialogImageUrl: "",
       dialogVisible: false,
       disabled: false,
-      editWorkInform: {
-        id: 1,
-        author: "",
-        opusName: "",
-        opusIntroduce: "",
-        opusType: "",
-        opusTitle: "",
-        photo: "",
-        video: "",
-        createTime: "",
-        make: "",
-        history: "",
-        origin: "",
-      },
+      editWorkInform: {},
+      addWorksForm: {},
+      addAuthorForm: {},
       editWorkVisible: false,
       queryInfo: {
         //请求参数
@@ -210,181 +439,56 @@ export default {
         pageSize: 10,
       },
       total: 10, //数据总数
-      workList: [
-        {
-          id: 1,
-          author: "罗聪",
-          opusName: "擂茶",
-          opusIntroduce:
-            "瑞金擂茶是将适量的大米加进芝麻、花生、绿豆、黄豆、茶叶、桔皮等擂制后，熬煮而成。擂茶风味独特，清香、微苦，呈灰绿色，稀糊浑浊，喝时加些香油，十分可口。瑞金人辛勤劳作后，喝上一碗擂茶顿时心清气爽，开胃解乏，擂茶有部分中草药，能起到解毒通气清凉的功效。做成的擂茶清香、味苦，呈灰绿色，稀糊浑浊。 \r\n中国人自古好茶，有言“茶余饭后”、“茶饭不思”、“柴米油盐酱醋茶”，多次将茶与粮食放在等同的地位上，可见茶的地位在国人眼中不容小觑。而瑞金擂茶却不同与茶，虽有“茶”的字样，却是地地道道的一道风味美食，可解馋养生。\r\n",
-          opusType: "食品",
-          opusTitle: "赣南擂茶",
-          photo:
-            "https://feiyi-141.oss-cn-hangzhou.aliyuncs.com/2022-07-18/bf9d7f1d876d416e8075a6d7a2130901.jpg",
-          video: null,
-          createTime: "2022-07-01",
-          make: "将大米、芝麻、花生、绿豆、黄豆、茶叶、桔子分别擂成碎末（可根据自己的喜好决定分量，也可以添加其他食材），切少许葱花备用切少许葱花备用，放入水中煮沸，香飘满座的时候撒上葱花即可。 擂成的谷物碎末也可分成一小份一小份存储起来，嘴馋的时候再用开水冲泡，营养满分。",
-          history:
-            "擂茶的历史可谓源远流长。湘有“诸葛亮麾下进军湘中遭遇瘟疫，一老妪制擂茶祛疾”的故事。有关的文学记载也散见在一些古籍中，如黄升《玉林诗话》所载《肝胎族舍》一诗曰：”道旁草屋两三家，见客擂麻旋足茶。渐近中原语音好，不知淮水是天涯”。足证研麻，泡茶款客，是当时江南的一种风俗。此外，汪增棋先生引《都城纪胜，茶坊》”冬天兼卖擂茶”、”冬月添卖七宝擂茶”；又引”杭州人一天吃三十文木头”这一古语，说明历史上南宋偏安，人口众多，擂茶相当普及，甚至日耗大量木质枣擂杵。",
-          origin:
-            "擂茶源自北宋，至今已有千年历史。从选料、制作、冲泡，都别具特色。关于擂茶的起源，相传三国时刘备率领军队过洞庭湖，军中将士染上一种怪病，一路上病倒数千人。队伍扶病行军勉强支撑到了桃花江，再也无力前进，刘备只得下令就地驻扎，并派人四处寻医问药。医方找来不少，但均不见效。一日，一位老翁路过刘备军营，见军中将士纪律严明，很受感动，便主动献出祖传秘方“三生汤”（即生米、生姜、生茶叶）。当地老百姓找一来陶钵和木棒，并按照老翁的配料和制作方法，把生米、生姜、生茶叶捣碎，冲上开水让将士们饮用。其效果果然十分灵验，有病的迅速康复，无病的不再感染。",
-        },
-        {
-          id: 2,
-          author: "大哥",
-          opusName: "采茶戏",
-          opusIntroduce: "ni",
-          opusType: "戏曲文化",
-          opusTitle: "赣南采茶戏",
-          photo: null,
-          video: null,
-          createTime: "2022-07-10",
-          make: "暂时还没有制作记录哦",
-          history: "暂时还没有历史记录哦",
-          origin: null,
-        },
-        {
-          id: 3,
-          author: "飞机",
-          opusName: "大",
-          opusIntroduce: "该作品还没有简介哦！",
-          opusType: null,
-          opusTitle: null,
-          photo: null,
-          video: null,
-          createTime: "2022-07-14",
-          make: "暂时还没有制作记录哦",
-          history: "暂时还没有历史记录哦",
-          origin: null,
-        },
-        {
-          id: 6,
-          author: "罗聪",
-          opusName: "糖画",
-          opusIntroduce:
-            "糖画是一种传统民间手工艺，以糖为材料来进行造型的。所用的工具仅一勺一铲，糖料一般是红、白糖加上少许饴糖放在炉子上用温火熬制，熬到可以牵丝时即可以用来浇铸造型了。在绘制造型时，由艺人用小汤勺舀起熔化了的糖汁，在石板上飞快地来回浇铸，画出造型，民间艺人的手上功夫便是造型的关键。当造型完成后，随即用小铲刀将糖画铲起，粘上竹签",
-          opusType: "手工艺",
-          opusTitle: "倒糖人儿",
-          photo:
-            "https://feiyi-141.oss-cn-hangzhou.aliyuncs.com/2022-07-18/03d43f7a61634b0eab1c96fe498f3ac8.jpg",
-          video: null,
-          createTime: "2022-07-18",
-          make: "在进行绘制糖人之前要先熬糖。熬糖前先准备一块大理石板，上面刷上油，油刷得要薄一些，这样可以防止糖粘在大理石板上。把一个铜锅放在火上，加入适量清水，再放入白砂糖。水与糖的比例是2比1。也就是说放两份水，放一份白砂糖。白砂糖放入以后要轻轻搅动一下，防止粘底。水温要逐渐升高，为的是利于糖溶解在水中。水开之后，把水蒸汽排到空气中。这时，糖液的温度逐渐变高，糖液中的水分逐渐减少。可以看到，糖液开始起大泡了。这是因为糖液中的水份少了，糖液的张力就大了。空气在排放的过程中，会在糖面上起一些大泡。这时候温度还不够。熬糖的合适温度是色泽稍微变黄，大泡变为小泡就差不多了。熬糖的目的是把糖液摊成糖片，以便在糖画绘制中使用。待颜色变黄，泡也变小了，火候就差不多了，趁热把它倒在大理石板上。糖液倒在大理石板上之后就会冷却、凝固。待糖液完全凝固后，把糖片切碎，收入盘中。质量好的糖块在常温下，半个月都不会溶化。这样熬制出的糖透明度较高，非常脆，不粘手，不滴油，不流液，才能作为绘制糖画的材料。在绘制糖画之前,首先要化糖。化糖就是把准备好的糖块放在糖锅内溶化。溶化糖要用小火，火大了糖就会焦。用温火将糖慢慢溶解，当糖完全溶解后就可以绘画了。做糖画的人是没有底稿的，画稿全在他的头脑里。做糖画必须胸有成竹，要趁热一气呵成，他们汲取了传统皮影制作的特征及雕刻技法，十二生肖喊来就来，张飞、赵云、花鸟鱼虫、飞禽走兽，随着缕缕糖丝的飘洒，便栩栩如生地呈现在你面前，再趁热粘上一根竹签，便大功告成。小孩举着腾云驾雾的飞龙或展翅欲飞的彩凤，对着阳光凝望，它是那么晶莹剔透，活灵活现，一时还舍不得吃，只轻轻用舌尖舔一下，又得意地向同伴炫耀，看得人眼馋口也馋。",
-          history:
-            "关于糖画，还有一个更加生动有趣的民间故事。据糖画老艺人白世云、樊德然、黎永成等回忆，相传唐代四川大诗人陈子昂在家乡时，很喜欢吃黄糖（蔗糖），不过他的吃法却与众不同。一代才子会首先将糖溶化，在清洁光滑的桌面上倒铸成各种小动物及各种花卉图案，待凝固后拿在手上，一面赏玩一面食用，自觉雅趣脱俗。后来陈子昂到京城长安游学求官，因初到京师人地两生，只做了一个小吏。闲暇无事时，便用从家乡带去的黄糖如法炮制，以度闲暇。一天，陈子昂正在赏玩自己的“作品”。谁知宫中太监带着小太子路过，小太子看见陈子昂手中的小动物，便吵着要。太监问明这些小动物是用糖做的时，便要了几个给小太子，欢欢喜喜回宫去了。谁知回宫后小太子将糖吃完了，哭着吵着还要，惊动了皇上，太监只好上前如实回禀。皇上听完原委，立即下诏宣陈子昂进宫，并要他当场表演。陈子昂便将带去的黄糖溶化，在光洁的桌面上倒了一枚铜钱，用一支竹筷粘上送到小太子手中，小太子立即破涕为笑。皇上心中一高兴，脱口说出“糖饼（儿）”两字，这就是“糖饼（儿）”这一名称的由来。由此陈子昂便得到了升迁，官至右拾遗。后来，陈子昂解衣归里后，为了纪念皇上的恩遇，同时也因闲居无聊，便收了几个徒弟传授此技。这些徒弟又传徒弟，并将它传向四方。有的干脆以此为业，走邨串乡做起糖饼儿生意来。这糖饼儿生意虽小，但因曾得到过皇帝的赏识，所以生意十分兴隆，学的人越来越多，并代代相传，这一技艺从此就流传下来。在一些大街小巷里经常会看见糖饼儿人的身影，周围围着一圈好奇的人。",
-          origin:
-            "尽管现在从事糖画行当的人数较过去有所下降，但是如今，糖画的这种魅力逐渐又得到了越来越多人的认可和关注，糖画艺人的地位也日益提升，以蔡树全为代表的一些艺人们通过各种形式被认可。蔡树全现为四川省民间文艺家协会常务理事。出生于四川糖艺世家的他，先后在国内各大都市及日本、德国、西班牙、新加坡等地作糖画表演。其作品及艺术成就在国内外近百家报刊、电视台作过宣传及专题报道，并被中国民间文艺家协会授予“民间工艺美术大师”，被联合国教科文组织授予“一级民间工艺美术家”，被中国民间工艺美术家委员会授予“国际民间工艺美术家”称号。",
-        },
-        {
-          id: 7,
-          author: "罗聪",
-          opusName: "糖画",
-          opusIntroduce:
-            "糖画是一种传统民间手工艺，以糖为材料来进行造型的。所用的工具仅一勺一铲，糖料一般是红、白糖加上少许饴糖放在炉子上用温火熬制，熬到可以牵丝时即可以用来浇铸造型了。在绘制造型时，由艺人用小汤勺舀起熔化了的糖汁，在石板上飞快地来回浇铸，画出造型，民间艺人的手上功夫便是造型的关键。当造型完成后，随即用小铲刀将糖画铲起，粘上竹签",
-          opusType: "手工艺",
-          opusTitle: "倒糖人儿",
-          photo: null,
-          video: null,
-          createTime: "2022-07-18",
-          make: "在进行绘制糖人之前要先熬糖。熬糖前先准备一块大理石板，上面刷上油，油刷得要薄一些，这样可以防止糖粘在大理石板上。把一个铜锅放在火上，加入适量清水，再放入白砂糖。水与糖的比例是2比1。也就是说放两份水，放一份白砂糖。白砂糖放入以后要轻轻搅动一下，防止粘底。水温要逐渐升高，为的是利于糖溶解在水中。水开之后，把水蒸汽排到空气中。这时，糖液的温度逐渐变高，糖液中的水分逐渐减少。可以看到，糖液开始起大泡了。这是因为糖液中的水份少了，糖液的张力就大了。空气在排放的过程中，会在糖面上起一些大泡。这时候温度还不够。熬糖的合适温度是色泽稍微变黄，大泡变为小泡就差不多了。熬糖的目的是把糖液摊成糖片，以便在糖画绘制中使用。待颜色变黄，泡也变小了，火候就差不多了，趁热把它倒在大理石板上。糖液倒在大理石板上之后就会冷却、凝固。待糖液完全凝固后，把糖片切碎，收入盘中。质量好的糖块在常温下，半个月都不会溶化。这样熬制出的糖透明度较高，非常脆，不粘手，不滴油，不流液，才能作为绘制糖画的材料。在绘制糖画之前,首先要化糖。化糖就是把准备好的糖块放在糖锅内溶化。溶化糖要用小火，火大了糖就会焦。用温火将糖慢慢溶解，当糖完全溶解后就可以绘画了。做糖画的人是没有底稿的，画稿全在他的头脑里。做糖画必须胸有成竹，要趁热一气呵成，他们汲取了传统皮影制作的特征及雕刻技法，十二生肖喊来就来，张飞、赵云、花鸟鱼虫、飞禽走兽，随着缕缕糖丝的飘洒，便栩栩如生地呈现在你面前，再趁热粘上一根竹签，便大功告成。小孩举着腾云驾雾的飞龙或展翅欲飞的彩凤，对着阳光凝望，它是那么晶莹剔透，活灵活现，一时还舍不得吃，只轻轻用舌尖舔一下，又得意地向同伴炫耀，看得人眼馋口也馋。",
-          history:
-            "关于糖画，还有一个更加生动有趣的民间故事。据糖画老艺人白世云、樊德然、黎永成等回忆，相传唐代四川大诗人陈子昂在家乡时，很喜欢吃黄糖（蔗糖），不过他的吃法却与众不同。一代才子会首先将糖溶化，在清洁光滑的桌面上倒铸成各种小动物及各种花卉图案，待凝固后拿在手上，一面赏玩一面食用，自觉雅趣脱俗。后来陈子昂到京城长安游学求官，因初到京师人地两生，只做了一个小吏。闲暇无事时，便用从家乡带去的黄糖如法炮制，以度闲暇。一天，陈子昂正在赏玩自己的“作品”。谁知宫中太监带着小太子路过，小太子看见陈子昂手中的小动物，便吵着要。太监问明这些小动物是用糖做的时，便要了几个给小太子，欢欢喜喜回宫去了。谁知回宫后小太子将糖吃完了，哭着吵着还要，惊动了皇上，太监只好上前如实回禀。皇上听完原委，立即下诏宣陈子昂进宫，并要他当场表演。陈子昂便将带去的黄糖溶化，在光洁的桌面上倒了一枚铜钱，用一支竹筷粘上送到小太子手中，小太子立即破涕为笑。皇上心中一高兴，脱口说出“糖饼（儿）”两字，这就是“糖饼（儿）”这一名称的由来。由此陈子昂便得到了升迁，官至右拾遗。后来，陈子昂解衣归里后，为了纪念皇上的恩遇，同时也因闲居无聊，便收了几个徒弟传授此技。这些徒弟又传徒弟，并将它传向四方。有的干脆以此为业，走邨串乡做起糖饼儿生意来。这糖饼儿生意虽小，但因曾得到过皇帝的赏识，所以生意十分兴隆，学的人越来越多，并代代相传，这一技艺从此就流传下来。在一些大街小巷里经常会看见糖饼儿人的身影，周围围着一圈好奇的人。",
-          origin:
-            "尽管现在从事糖画行当的人数较过去有所下降，但是如今，糖画的这种魅力逐渐又得到了越来越多人的认可和关注，糖画艺人的地位也日益提升，以蔡树全为代表的一些艺人们通过各种形式被认可。蔡树全现为四川省民间文艺家协会常务理事。出生于四川糖艺世家的他，先后在国内各大都市及日本、德国、西班牙、新加坡等地作糖画表演。其作品及艺术成就在国内外近百家报刊、电视台作过宣传及专题报道，并被中国民间文艺家协会授予“民间工艺美术大师”，被联合国教科文组织授予“一级民间工艺美术家”，被中国民间工艺美术家委员会授予“国际民间工艺美术家”称号。",
-        },
-        {
-          id: 7,
-          author: "罗聪",
-          opusName: "糖画",
-          opusIntroduce:
-            "糖画是一种传统民间手工艺，以糖为材料来进行造型的。所用的工具仅一勺一铲，糖料一般是红、白糖加上少许饴糖放在炉子上用温火熬制，熬到可以牵丝时即可以用来浇铸造型了。在绘制造型时，由艺人用小汤勺舀起熔化了的糖汁，在石板上飞快地来回浇铸，画出造型，民间艺人的手上功夫便是造型的关键。当造型完成后，随即用小铲刀将糖画铲起，粘上竹签",
-          opusType: "手工艺",
-          opusTitle: "倒糖人儿",
-          photo: null,
-          video: null,
-          createTime: "2022-07-18",
-          make: "在进行绘制糖人之前要先熬糖。熬糖前先准备一块大理石板，上面刷上油，油刷得要薄一些，这样可以防止糖粘在大理石板上。把一个铜锅放在火上，加入适量清水，再放入白砂糖。水与糖的比例是2比1。也就是说放两份水，放一份白砂糖。白砂糖放入以后要轻轻搅动一下，防止粘底。水温要逐渐升高，为的是利于糖溶解在水中。水开之后，把水蒸汽排到空气中。这时，糖液的温度逐渐变高，糖液中的水分逐渐减少。可以看到，糖液开始起大泡了。这是因为糖液中的水份少了，糖液的张力就大了。空气在排放的过程中，会在糖面上起一些大泡。这时候温度还不够。熬糖的合适温度是色泽稍微变黄，大泡变为小泡就差不多了。熬糖的目的是把糖液摊成糖片，以便在糖画绘制中使用。待颜色变黄，泡也变小了，火候就差不多了，趁热把它倒在大理石板上。糖液倒在大理石板上之后就会冷却、凝固。待糖液完全凝固后，把糖片切碎，收入盘中。质量好的糖块在常温下，半个月都不会溶化。这样熬制出的糖透明度较高，非常脆，不粘手，不滴油，不流液，才能作为绘制糖画的材料。在绘制糖画之前,首先要化糖。化糖就是把准备好的糖块放在糖锅内溶化。溶化糖要用小火，火大了糖就会焦。用温火将糖慢慢溶解，当糖完全溶解后就可以绘画了。做糖画的人是没有底稿的，画稿全在他的头脑里。做糖画必须胸有成竹，要趁热一气呵成，他们汲取了传统皮影制作的特征及雕刻技法，十二生肖喊来就来，张飞、赵云、花鸟鱼虫、飞禽走兽，随着缕缕糖丝的飘洒，便栩栩如生地呈现在你面前，再趁热粘上一根竹签，便大功告成。小孩举着腾云驾雾的飞龙或展翅欲飞的彩凤，对着阳光凝望，它是那么晶莹剔透，活灵活现，一时还舍不得吃，只轻轻用舌尖舔一下，又得意地向同伴炫耀，看得人眼馋口也馋。",
-          history:
-            "关于糖画，还有一个更加生动有趣的民间故事。据糖画老艺人白世云、樊德然、黎永成等回忆，相传唐代四川大诗人陈子昂在家乡时，很喜欢吃黄糖（蔗糖），不过他的吃法却与众不同。一代才子会首先将糖溶化，在清洁光滑的桌面上倒铸成各种小动物及各种花卉图案，待凝固后拿在手上，一面赏玩一面食用，自觉雅趣脱俗。后来陈子昂到京城长安游学求官，因初到京师人地两生，只做了一个小吏。闲暇无事时，便用从家乡带去的黄糖如法炮制，以度闲暇。一天，陈子昂正在赏玩自己的“作品”。谁知宫中太监带着小太子路过，小太子看见陈子昂手中的小动物，便吵着要。太监问明这些小动物是用糖做的时，便要了几个给小太子，欢欢喜喜回宫去了。谁知回宫后小太子将糖吃完了，哭着吵着还要，惊动了皇上，太监只好上前如实回禀。皇上听完原委，立即下诏宣陈子昂进宫，并要他当场表演。陈子昂便将带去的黄糖溶化，在光洁的桌面上倒了一枚铜钱，用一支竹筷粘上送到小太子手中，小太子立即破涕为笑。皇上心中一高兴，脱口说出“糖饼（儿）”两字，这就是“糖饼（儿）”这一名称的由来。由此陈子昂便得到了升迁，官至右拾遗。后来，陈子昂解衣归里后，为了纪念皇上的恩遇，同时也因闲居无聊，便收了几个徒弟传授此技。这些徒弟又传徒弟，并将它传向四方。有的干脆以此为业，走邨串乡做起糖饼儿生意来。这糖饼儿生意虽小，但因曾得到过皇帝的赏识，所以生意十分兴隆，学的人越来越多，并代代相传，这一技艺从此就流传下来。在一些大街小巷里经常会看见糖饼儿人的身影，周围围着一圈好奇的人。",
-          origin:
-            "尽管现在从事糖画行当的人数较过去有所下降，但是如今，糖画的这种魅力逐渐又得到了越来越多人的认可和关注，糖画艺人的地位也日益提升，以蔡树全为代表的一些艺人们通过各种形式被认可。蔡树全现为四川省民间文艺家协会常务理事。出生于四川糖艺世家的他，先后在国内各大都市及日本、德国、西班牙、新加坡等地作糖画表演。其作品及艺术成就在国内外近百家报刊、电视台作过宣传及专题报道，并被中国民间文艺家协会授予“民间工艺美术大师”，被联合国教科文组织授予“一级民间工艺美术家”，被中国民间工艺美术家委员会授予“国际民间工艺美术家”称号。",
-        },
-        {
-          id: 7,
-          author: "罗聪",
-          opusName: "糖画",
-          opusIntroduce:
-            "糖画是一种传统民间手工艺，以糖为材料来进行造型的。所用的工具仅一勺一铲，糖料一般是红、白糖加上少许饴糖放在炉子上用温火熬制，熬到可以牵丝时即可以用来浇铸造型了。在绘制造型时，由艺人用小汤勺舀起熔化了的糖汁，在石板上飞快地来回浇铸，画出造型，民间艺人的手上功夫便是造型的关键。当造型完成后，随即用小铲刀将糖画铲起，粘上竹签",
-          opusType: "手工艺",
-          opusTitle: "倒糖人儿",
-          photo: null,
-          video: null,
-          createTime: "2022-07-18",
-          make: "在进行绘制糖人之前要先熬糖。熬糖前先准备一块大理石板，上面刷上油，油刷得要薄一些，这样可以防止糖粘在大理石板上。把一个铜锅放在火上，加入适量清水，再放入白砂糖。水与糖的比例是2比1。也就是说放两份水，放一份白砂糖。白砂糖放入以后要轻轻搅动一下，防止粘底。水温要逐渐升高，为的是利于糖溶解在水中。水开之后，把水蒸汽排到空气中。这时，糖液的温度逐渐变高，糖液中的水分逐渐减少。可以看到，糖液开始起大泡了。这是因为糖液中的水份少了，糖液的张力就大了。空气在排放的过程中，会在糖面上起一些大泡。这时候温度还不够。熬糖的合适温度是色泽稍微变黄，大泡变为小泡就差不多了。熬糖的目的是把糖液摊成糖片，以便在糖画绘制中使用。待颜色变黄，泡也变小了，火候就差不多了，趁热把它倒在大理石板上。糖液倒在大理石板上之后就会冷却、凝固。待糖液完全凝固后，把糖片切碎，收入盘中。质量好的糖块在常温下，半个月都不会溶化。这样熬制出的糖透明度较高，非常脆，不粘手，不滴油，不流液，才能作为绘制糖画的材料。在绘制糖画之前,首先要化糖。化糖就是把准备好的糖块放在糖锅内溶化。溶化糖要用小火，火大了糖就会焦。用温火将糖慢慢溶解，当糖完全溶解后就可以绘画了。做糖画的人是没有底稿的，画稿全在他的头脑里。做糖画必须胸有成竹，要趁热一气呵成，他们汲取了传统皮影制作的特征及雕刻技法，十二生肖喊来就来，张飞、赵云、花鸟鱼虫、飞禽走兽，随着缕缕糖丝的飘洒，便栩栩如生地呈现在你面前，再趁热粘上一根竹签，便大功告成。小孩举着腾云驾雾的飞龙或展翅欲飞的彩凤，对着阳光凝望，它是那么晶莹剔透，活灵活现，一时还舍不得吃，只轻轻用舌尖舔一下，又得意地向同伴炫耀，看得人眼馋口也馋。",
-          history:
-            "关于糖画，还有一个更加生动有趣的民间故事。据糖画老艺人白世云、樊德然、黎永成等回忆，相传唐代四川大诗人陈子昂在家乡时，很喜欢吃黄糖（蔗糖），不过他的吃法却与众不同。一代才子会首先将糖溶化，在清洁光滑的桌面上倒铸成各种小动物及各种花卉图案，待凝固后拿在手上，一面赏玩一面食用，自觉雅趣脱俗。后来陈子昂到京城长安游学求官，因初到京师人地两生，只做了一个小吏。闲暇无事时，便用从家乡带去的黄糖如法炮制，以度闲暇。一天，陈子昂正在赏玩自己的“作品”。谁知宫中太监带着小太子路过，小太子看见陈子昂手中的小动物，便吵着要。太监问明这些小动物是用糖做的时，便要了几个给小太子，欢欢喜喜回宫去了。谁知回宫后小太子将糖吃完了，哭着吵着还要，惊动了皇上，太监只好上前如实回禀。皇上听完原委，立即下诏宣陈子昂进宫，并要他当场表演。陈子昂便将带去的黄糖溶化，在光洁的桌面上倒了一枚铜钱，用一支竹筷粘上送到小太子手中，小太子立即破涕为笑。皇上心中一高兴，脱口说出“糖饼（儿）”两字，这就是“糖饼（儿）”这一名称的由来。由此陈子昂便得到了升迁，官至右拾遗。后来，陈子昂解衣归里后，为了纪念皇上的恩遇，同时也因闲居无聊，便收了几个徒弟传授此技。这些徒弟又传徒弟，并将它传向四方。有的干脆以此为业，走邨串乡做起糖饼儿生意来。这糖饼儿生意虽小，但因曾得到过皇帝的赏识，所以生意十分兴隆，学的人越来越多，并代代相传，这一技艺从此就流传下来。在一些大街小巷里经常会看见糖饼儿人的身影，周围围着一圈好奇的人。",
-          origin:
-            "尽管现在从事糖画行当的人数较过去有所下降，但是如今，糖画的这种魅力逐渐又得到了越来越多人的认可和关注，糖画艺人的地位也日益提升，以蔡树全为代表的一些艺人们通过各种形式被认可。蔡树全现为四川省民间文艺家协会常务理事。出生于四川糖艺世家的他，先后在国内各大都市及日本、德国、西班牙、新加坡等地作糖画表演。其作品及艺术成就在国内外近百家报刊、电视台作过宣传及专题报道，并被中国民间文艺家协会授予“民间工艺美术大师”，被联合国教科文组织授予“一级民间工艺美术家”，被中国民间工艺美术家委员会授予“国际民间工艺美术家”称号。",
-        },
-        {
-          id: 7,
-          author: "罗聪",
-          opusName: "糖画",
-          opusIntroduce:
-            "糖画是一种传统民间手工艺，以糖为材料来进行造型的。所用的工具仅一勺一铲，糖料一般是红、白糖加上少许饴糖放在炉子上用温火熬制，熬到可以牵丝时即可以用来浇铸造型了。在绘制造型时，由艺人用小汤勺舀起熔化了的糖汁，在石板上飞快地来回浇铸，画出造型，民间艺人的手上功夫便是造型的关键。当造型完成后，随即用小铲刀将糖画铲起，粘上竹签",
-          opusType: "手工艺",
-          opusTitle: "倒糖人儿",
-          photo: null,
-          video: null,
-          createTime: "2022-07-18",
-          make: "在进行绘制糖人之前要先熬糖。熬糖前先准备一块大理石板，上面刷上油，油刷得要薄一些，这样可以防止糖粘在大理石板上。把一个铜锅放在火上，加入适量清水，再放入白砂糖。水与糖的比例是2比1。也就是说放两份水，放一份白砂糖。白砂糖放入以后要轻轻搅动一下，防止粘底。水温要逐渐升高，为的是利于糖溶解在水中。水开之后，把水蒸汽排到空气中。这时，糖液的温度逐渐变高，糖液中的水分逐渐减少。可以看到，糖液开始起大泡了。这是因为糖液中的水份少了，糖液的张力就大了。空气在排放的过程中，会在糖面上起一些大泡。这时候温度还不够。熬糖的合适温度是色泽稍微变黄，大泡变为小泡就差不多了。熬糖的目的是把糖液摊成糖片，以便在糖画绘制中使用。待颜色变黄，泡也变小了，火候就差不多了，趁热把它倒在大理石板上。糖液倒在大理石板上之后就会冷却、凝固。待糖液完全凝固后，把糖片切碎，收入盘中。质量好的糖块在常温下，半个月都不会溶化。这样熬制出的糖透明度较高，非常脆，不粘手，不滴油，不流液，才能作为绘制糖画的材料。在绘制糖画之前,首先要化糖。化糖就是把准备好的糖块放在糖锅内溶化。溶化糖要用小火，火大了糖就会焦。用温火将糖慢慢溶解，当糖完全溶解后就可以绘画了。做糖画的人是没有底稿的，画稿全在他的头脑里。做糖画必须胸有成竹，要趁热一气呵成，他们汲取了传统皮影制作的特征及雕刻技法，十二生肖喊来就来，张飞、赵云、花鸟鱼虫、飞禽走兽，随着缕缕糖丝的飘洒，便栩栩如生地呈现在你面前，再趁热粘上一根竹签，便大功告成。小孩举着腾云驾雾的飞龙或展翅欲飞的彩凤，对着阳光凝望，它是那么晶莹剔透，活灵活现，一时还舍不得吃，只轻轻用舌尖舔一下，又得意地向同伴炫耀，看得人眼馋口也馋。",
-          history:
-            "关于糖画，还有一个更加生动有趣的民间故事。据糖画老艺人白世云、樊德然、黎永成等回忆，相传唐代四川大诗人陈子昂在家乡时，很喜欢吃黄糖（蔗糖），不过他的吃法却与众不同。一代才子会首先将糖溶化，在清洁光滑的桌面上倒铸成各种小动物及各种花卉图案，待凝固后拿在手上，一面赏玩一面食用，自觉雅趣脱俗。后来陈子昂到京城长安游学求官，因初到京师人地两生，只做了一个小吏。闲暇无事时，便用从家乡带去的黄糖如法炮制，以度闲暇。一天，陈子昂正在赏玩自己的“作品”。谁知宫中太监带着小太子路过，小太子看见陈子昂手中的小动物，便吵着要。太监问明这些小动物是用糖做的时，便要了几个给小太子，欢欢喜喜回宫去了。谁知回宫后小太子将糖吃完了，哭着吵着还要，惊动了皇上，太监只好上前如实回禀。皇上听完原委，立即下诏宣陈子昂进宫，并要他当场表演。陈子昂便将带去的黄糖溶化，在光洁的桌面上倒了一枚铜钱，用一支竹筷粘上送到小太子手中，小太子立即破涕为笑。皇上心中一高兴，脱口说出“糖饼（儿）”两字，这就是“糖饼（儿）”这一名称的由来。由此陈子昂便得到了升迁，官至右拾遗。后来，陈子昂解衣归里后，为了纪念皇上的恩遇，同时也因闲居无聊，便收了几个徒弟传授此技。这些徒弟又传徒弟，并将它传向四方。有的干脆以此为业，走邨串乡做起糖饼儿生意来。这糖饼儿生意虽小，但因曾得到过皇帝的赏识，所以生意十分兴隆，学的人越来越多，并代代相传，这一技艺从此就流传下来。在一些大街小巷里经常会看见糖饼儿人的身影，周围围着一圈好奇的人。",
-          origin:
-            "尽管现在从事糖画行当的人数较过去有所下降，但是如今，糖画的这种魅力逐渐又得到了越来越多人的认可和关注，糖画艺人的地位也日益提升，以蔡树全为代表的一些艺人们通过各种形式被认可。蔡树全现为四川省民间文艺家协会常务理事。出生于四川糖艺世家的他，先后在国内各大都市及日本、德国、西班牙、新加坡等地作糖画表演。其作品及艺术成就在国内外近百家报刊、电视台作过宣传及专题报道，并被中国民间文艺家协会授予“民间工艺美术大师”，被联合国教科文组织授予“一级民间工艺美术家”，被中国民间工艺美术家委员会授予“国际民间工艺美术家”称号。",
-        },
-        {
-          id: 7,
-          author: "罗聪",
-          opusName: "糖画",
-          opusIntroduce:
-            "糖画是一种传统民间手工艺，以糖为材料来进行造型的。所用的工具仅一勺一铲，糖料一般是红、白糖加上少许饴糖放在炉子上用温火熬制，熬到可以牵丝时即可以用来浇铸造型了。在绘制造型时，由艺人用小汤勺舀起熔化了的糖汁，在石板上飞快地来回浇铸，画出造型，民间艺人的手上功夫便是造型的关键。当造型完成后，随即用小铲刀将糖画铲起，粘上竹签",
-          opusType: "手工艺",
-          opusTitle: "倒糖人儿",
-          photo: null,
-          video: null,
-          createTime: "2022-07-18",
-          make: "在进行绘制糖人之前要先熬糖。熬糖前先准备一块大理石板，上面刷上油，油刷得要薄一些，这样可以防止糖粘在大理石板上。把一个铜锅放在火上，加入适量清水，再放入白砂糖。水与糖的比例是2比1。也就是说放两份水，放一份白砂糖。白砂糖放入以后要轻轻搅动一下，防止粘底。水温要逐渐升高，为的是利于糖溶解在水中。水开之后，把水蒸汽排到空气中。这时，糖液的温度逐渐变高，糖液中的水分逐渐减少。可以看到，糖液开始起大泡了。这是因为糖液中的水份少了，糖液的张力就大了。空气在排放的过程中，会在糖面上起一些大泡。这时候温度还不够。熬糖的合适温度是色泽稍微变黄，大泡变为小泡就差不多了。熬糖的目的是把糖液摊成糖片，以便在糖画绘制中使用。待颜色变黄，泡也变小了，火候就差不多了，趁热把它倒在大理石板上。糖液倒在大理石板上之后就会冷却、凝固。待糖液完全凝固后，把糖片切碎，收入盘中。质量好的糖块在常温下，半个月都不会溶化。这样熬制出的糖透明度较高，非常脆，不粘手，不滴油，不流液，才能作为绘制糖画的材料。在绘制糖画之前,首先要化糖。化糖就是把准备好的糖块放在糖锅内溶化。溶化糖要用小火，火大了糖就会焦。用温火将糖慢慢溶解，当糖完全溶解后就可以绘画了。做糖画的人是没有底稿的，画稿全在他的头脑里。做糖画必须胸有成竹，要趁热一气呵成，他们汲取了传统皮影制作的特征及雕刻技法，十二生肖喊来就来，张飞、赵云、花鸟鱼虫、飞禽走兽，随着缕缕糖丝的飘洒，便栩栩如生地呈现在你面前，再趁热粘上一根竹签，便大功告成。小孩举着腾云驾雾的飞龙或展翅欲飞的彩凤，对着阳光凝望，它是那么晶莹剔透，活灵活现，一时还舍不得吃，只轻轻用舌尖舔一下，又得意地向同伴炫耀，看得人眼馋口也馋。",
-          history:
-            "关于糖画，还有一个更加生动有趣的民间故事。据糖画老艺人白世云、樊德然、黎永成等回忆，相传唐代四川大诗人陈子昂在家乡时，很喜欢吃黄糖（蔗糖），不过他的吃法却与众不同。一代才子会首先将糖溶化，在清洁光滑的桌面上倒铸成各种小动物及各种花卉图案，待凝固后拿在手上，一面赏玩一面食用，自觉雅趣脱俗。后来陈子昂到京城长安游学求官，因初到京师人地两生，只做了一个小吏。闲暇无事时，便用从家乡带去的黄糖如法炮制，以度闲暇。一天，陈子昂正在赏玩自己的“作品”。谁知宫中太监带着小太子路过，小太子看见陈子昂手中的小动物，便吵着要。太监问明这些小动物是用糖做的时，便要了几个给小太子，欢欢喜喜回宫去了。谁知回宫后小太子将糖吃完了，哭着吵着还要，惊动了皇上，太监只好上前如实回禀。皇上听完原委，立即下诏宣陈子昂进宫，并要他当场表演。陈子昂便将带去的黄糖溶化，在光洁的桌面上倒了一枚铜钱，用一支竹筷粘上送到小太子手中，小太子立即破涕为笑。皇上心中一高兴，脱口说出“糖饼（儿）”两字，这就是“糖饼（儿）”这一名称的由来。由此陈子昂便得到了升迁，官至右拾遗。后来，陈子昂解衣归里后，为了纪念皇上的恩遇，同时也因闲居无聊，便收了几个徒弟传授此技。这些徒弟又传徒弟，并将它传向四方。有的干脆以此为业，走邨串乡做起糖饼儿生意来。这糖饼儿生意虽小，但因曾得到过皇帝的赏识，所以生意十分兴隆，学的人越来越多，并代代相传，这一技艺从此就流传下来。在一些大街小巷里经常会看见糖饼儿人的身影，周围围着一圈好奇的人。",
-          origin:
-            "尽管现在从事糖画行当的人数较过去有所下降，但是如今，糖画的这种魅力逐渐又得到了越来越多人的认可和关注，糖画艺人的地位也日益提升，以蔡树全为代表的一些艺人们通过各种形式被认可。蔡树全现为四川省民间文艺家协会常务理事。出生于四川糖艺世家的他，先后在国内各大都市及日本、德国、西班牙、新加坡等地作糖画表演。其作品及艺术成就在国内外近百家报刊、电视台作过宣传及专题报道，并被中国民间文艺家协会授予“民间工艺美术大师”，被联合国教科文组织授予“一级民间工艺美术家”，被中国民间工艺美术家委员会授予“国际民间工艺美术家”称号。",
-        },
-        {
-          id: 7,
-          author: "罗聪",
-          opusName: "糖画",
-          opusIntroduce:
-            "糖画是一种传统民间手工艺，以糖为材料来进行造型的。所用的工具仅一勺一铲，糖料一般是红、白糖加上少许饴糖放在炉子上用温火熬制，熬到可以牵丝时即可以用来浇铸造型了。在绘制造型时，由艺人用小汤勺舀起熔化了的糖汁，在石板上飞快地来回浇铸，画出造型，民间艺人的手上功夫便是造型的关键。当造型完成后，随即用小铲刀将糖画铲起，粘上竹签",
-          opusType: "手工艺",
-          opusTitle: "倒糖人儿",
-          photo: null,
-          video: null,
-          createTime: "2022-07-18",
-          make: "在进行绘制糖人之前要先熬糖。熬糖前先准备一块大理石板，上面刷上油，油刷得要薄一些，这样可以防止糖粘在大理石板上。把一个铜锅放在火上，加入适量清水，再放入白砂糖。水与糖的比例是2比1。也就是说放两份水，放一份白砂糖。白砂糖放入以后要轻轻搅动一下，防止粘底。水温要逐渐升高，为的是利于糖溶解在水中。水开之后，把水蒸汽排到空气中。这时，糖液的温度逐渐变高，糖液中的水分逐渐减少。可以看到，糖液开始起大泡了。这是因为糖液中的水份少了，糖液的张力就大了。空气在排放的过程中，会在糖面上起一些大泡。这时候温度还不够。熬糖的合适温度是色泽稍微变黄，大泡变为小泡就差不多了。熬糖的目的是把糖液摊成糖片，以便在糖画绘制中使用。待颜色变黄，泡也变小了，火候就差不多了，趁热把它倒在大理石板上。糖液倒在大理石板上之后就会冷却、凝固。待糖液完全凝固后，把糖片切碎，收入盘中。质量好的糖块在常温下，半个月都不会溶化。这样熬制出的糖透明度较高，非常脆，不粘手，不滴油，不流液，才能作为绘制糖画的材料。在绘制糖画之前,首先要化糖。化糖就是把准备好的糖块放在糖锅内溶化。溶化糖要用小火，火大了糖就会焦。用温火将糖慢慢溶解，当糖完全溶解后就可以绘画了。做糖画的人是没有底稿的，画稿全在他的头脑里。做糖画必须胸有成竹，要趁热一气呵成，他们汲取了传统皮影制作的特征及雕刻技法，十二生肖喊来就来，张飞、赵云、花鸟鱼虫、飞禽走兽，随着缕缕糖丝的飘洒，便栩栩如生地呈现在你面前，再趁热粘上一根竹签，便大功告成。小孩举着腾云驾雾的飞龙或展翅欲飞的彩凤，对着阳光凝望，它是那么晶莹剔透，活灵活现，一时还舍不得吃，只轻轻用舌尖舔一下，又得意地向同伴炫耀，看得人眼馋口也馋。",
-          history:
-            "关于糖画，还有一个更加生动有趣的民间故事。据糖画老艺人白世云、樊德然、黎永成等回忆，相传唐代四川大诗人陈子昂在家乡时，很喜欢吃黄糖（蔗糖），不过他的吃法却与众不同。一代才子会首先将糖溶化，在清洁光滑的桌面上倒铸成各种小动物及各种花卉图案，待凝固后拿在手上，一面赏玩一面食用，自觉雅趣脱俗。后来陈子昂到京城长安游学求官，因初到京师人地两生，只做了一个小吏。闲暇无事时，便用从家乡带去的黄糖如法炮制，以度闲暇。一天，陈子昂正在赏玩自己的“作品”。谁知宫中太监带着小太子路过，小太子看见陈子昂手中的小动物，便吵着要。太监问明这些小动物是用糖做的时，便要了几个给小太子，欢欢喜喜回宫去了。谁知回宫后小太子将糖吃完了，哭着吵着还要，惊动了皇上，太监只好上前如实回禀。皇上听完原委，立即下诏宣陈子昂进宫，并要他当场表演。陈子昂便将带去的黄糖溶化，在光洁的桌面上倒了一枚铜钱，用一支竹筷粘上送到小太子手中，小太子立即破涕为笑。皇上心中一高兴，脱口说出“糖饼（儿）”两字，这就是“糖饼（儿）”这一名称的由来。由此陈子昂便得到了升迁，官至右拾遗。后来，陈子昂解衣归里后，为了纪念皇上的恩遇，同时也因闲居无聊，便收了几个徒弟传授此技。这些徒弟又传徒弟，并将它传向四方。有的干脆以此为业，走邨串乡做起糖饼儿生意来。这糖饼儿生意虽小，但因曾得到过皇帝的赏识，所以生意十分兴隆，学的人越来越多，并代代相传，这一技艺从此就流传下来。在一些大街小巷里经常会看见糖饼儿人的身影，周围围着一圈好奇的人。",
-          origin:
-            "尽管现在从事糖画行当的人数较过去有所下降，但是如今，糖画的这种魅力逐渐又得到了越来越多人的认可和关注，糖画艺人的地位也日益提升，以蔡树全为代表的一些艺人们通过各种形式被认可。蔡树全现为四川省民间文艺家协会常务理事。出生于四川糖艺世家的他，先后在国内各大都市及日本、德国、西班牙、新加坡等地作糖画表演。其作品及艺术成就在国内外近百家报刊、电视台作过宣传及专题报道，并被中国民间文艺家协会授予“民间工艺美术大师”，被联合国教科文组织授予“一级民间工艺美术家”，被中国民间工艺美术家委员会授予“国际民间工艺美术家”称号。",
-        },
-      ],
     };
   },
+  computed: {
+    ...mapState({
+      worksList: (state) => state.works.worksList,
+      workId: (state) => state.works.workId,
+    }),
+  },
   methods: {
-    goAdd() {},
+    closeAdd() {
+      this.isAdd = false;
+    },
+    goAdd() {
+      this.isAdd = true;
+    },
+    selectDelete() {
+      let worksId = [];
+      this.$refs.worksTable.selection.forEach((element) => {
+        worksId.push(element.id);
+      });
+      this.$store.dispatch("deleteWorks", worksId);
+      location.reload();
+    },
     handleEdit(e) {
       this.editWorkInform = e;
       this.editWorkVisible = true;
+    },
+    handleSearch() {
+      this.$store.dispatch("worksList", {
+        opusType: "",
+        opusName: this.searchInput,
+      });
+    },
+    tabClick() {},
+    async deletePhoto(id) {
+      const result = await this.$confirm("确定删除这张图片吗？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).catch((err) => err);
+      if (result !== "confirm") {
+        return this.$message.info("已取消删除操作！");
+      } else {
+        this.editWorkInform.photos.forEach((item, index) => {
+          if (item.id == id) {
+            this.editWorkInform.photos.splice(index, 1);
+          }
+        });
+        this.$store.dispatch("deletePhoto", {id:id + ""});
+      }
     },
     handleRemove(file) {
       console.log(file);
@@ -393,7 +497,7 @@ export default {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     },
-    async handleDelete() {
+    async handleDelete(e) {
       const result = await this.$confirm("确定删除这个作品吗？", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -402,13 +506,133 @@ export default {
       if (result !== "confirm") {
         return this.$message.info("已取消删除操作！");
       } else {
-        this.$store.dispatch("delete");
+        let deleteId = [e.id];
+        this.$store.dispatch("deleteWorks", deleteId);
+        location.reload();
       }
     },
-    confirmEdit() {},
+    uploadPictureSuccess(res) {
+      this.editWorkInform.photos.push({
+        id: "",
+        opusId: "",
+        url: res.data,
+      });
+    },
+    uploadFirstPictureSuccess(res) {
+      console.log(res.data);
+      this.addWorksForm.photos.push({
+        id: "",
+        opusId: "",
+        url: res.data,
+      });
+    },
+    beforePictureUpload(file) {
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      const isJPG = file.type === "image/jpeg";
+      const isPNG = file.type === "image/png";
+      if (!isLt2M) {
+        this.$message.error("上传图片大小不能超过 2MB!");
+      }
+      if (!isJPG && !isPNG) {
+        this.$message.error("上传图片只能是 JPG 或 PNG 格式!");
+      }
+      return isLt2M && (isJPG || isPNG);
+    },
+    beforeVideoUpload(file) {
+      const isLt100M = file.size / 1024 / 1024 < 100;
+      const isMP4 = file.type === "video/mp4";
+      if (!isLt100M) {
+        this.$message.error("上传视频大小不能超过 100MB!");
+      }
+      if (!isMP4) {
+        this.$message.error("上传图片只能是 MP4 格式!");
+      }
+      return isLt100M && isMP4;
+    },
+    uploadVideoSuccess(res) {
+      delete this.addWorksForm.photos;
+      this.addWorksForm.video = res.data;
+      this.$store.dispatch("commitWorkEdit", this.addWorksForm);
+    },
+    confirmEdit() {
+      delete this.editWorkInform.photos;
+      this.$refs.photoUpload.submit();
+      this.$store.dispatch("commitWorkEdit", this.editWorkInform);
+      location.reload();
+    },
+    submitAdd() {
+      this.$store.dispatch("submitAddWork", this.addWorksForm);
+    },
+    completeAdd() {
+      this.activeIndex = "5";
+      location.reload();
+    },
+    submitAuthor() {
+      let authorForm = this.addAuthorForm;
+      authorForm.opus_id = this.workId + "";
+      authorForm.age = authorForm.age + "";
+      this.$store.dispatch("submitAuthor", authorForm);
+    },
+    nextIndex() {
+      if (this.activeIndex == "0") {
+        if (
+          this.addWorksForm.opusName &&
+          this.addWorksForm.opusTitle &&
+          this.addWorksForm.opusType
+        ) {
+          this.activeIndex = "1";
+        } else {
+          this.$message.error("请将必要的信息填写完整！");
+        }
+      } else if (this.activeIndex == "1") {
+        if (this.addWorksForm.opusIntroduce && this.addWorksForm.history) {
+          this.submitAdd();
+          this.activeIndex = "2";
+        } else {
+          this.$message.error("请将必要的信息填写完整！");
+        }
+      } else if (this.activeIndex == "2") {
+        if (
+          this.addAuthorForm.name &&
+          this.addAuthorForm.age &&
+          this.addAuthorForm.photos
+        ) {
+          this.submitAuthor();
+          this.activeIndex = "3";
+        } else if (!this.addAuthorForm.photos) {
+          this.$message.error("请上传作者头像");
+        } else {
+          this.$message.error("请将必要的信息填写完整！");
+        }
+      } else if (this.activeIndex == "3") {
+        if (this.addAuthorForm.photos) {
+          this.activeIndex = "4";
+        } else {
+          this.$message.error("请上传作品图片！");
+        }
+      }
+    },
+    beforeAvatarUpload(file) {
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      const isJPG = file.type === "image/jpeg";
+      const isPNG = file.type === "image/png";
+      if (!isLt2M) {
+        this.$message.error("上传头像图片大小不能超过 2MB!");
+      }
+      if (!isJPG && !isPNG) {
+        this.$message.error("上传头像图片只能是 JPG 或 PNG 格式!");
+      }
+      return isLt2M && (isJPG || isPNG);
+    },
+    handleAvatarSuccess(res) {
+      this.addAuthorForm.photos = res.data;
+    },
     editWorkClosed() {},
     handleSizeChange() {},
     handleCurrentChange() {},
+  },
+  mounted() {
+    this.$store.dispatch("worksList", { opusType: "", opusName: "" });
   },
 };
 </script>
@@ -419,7 +643,7 @@ export default {
 
   .workManage {
     background-color: rgb(35, 42, 69);
-    height: 100vh;
+    min-height: 100vh;
     width: 90%;
     position: absolute;
     right: 0;
@@ -428,6 +652,106 @@ export default {
       margin: auto;
       margin-top: 2%;
     }
+  }
+  .pictureLi {
+    background-color: #fbfdff;
+    border: 1px dashed #c0ccda;
+    border-radius: 6px;
+    box-sizing: border-box;
+    width: 148px;
+    height: 148px;
+    cursor: pointer;
+    line-height: 146px;
+    vertical-align: top;
+    display: inline-block;
+  }
+  .picture {
+    display: inline-block;
+    position: relative;
+    .pictureLi {
+      background-color: #fbfdff;
+      border: 1px dashed #c0ccda;
+      border-radius: 6px;
+      box-sizing: border-box;
+      width: 148px;
+      height: 148px;
+      cursor: pointer;
+      line-height: 146px;
+      vertical-align: top;
+      display: inline-block;
+    }
+    .handle {
+      top: 0;
+      left: 0;
+      position: absolute;
+      display: flex;
+      width: 148px;
+      height: 148px;
+      border-radius: 6px;
+      background-color: rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      transition: 0.5s;
+      span {
+        color: #fff;
+        cursor: pointer;
+        margin: auto;
+      }
+    }
+    &:hover {
+      .handle {
+        opacity: 1;
+      }
+    }
+  }
+}
+.el-steps {
+  align-items: center;
+  justify-content: center;
+}
+.saveWork {
+  float: right;
+}
+.avatar {
+  height: 3rem;
+  width: 3rem;
+  margin: auto 0;
+  margin-left: 5%;
+  display: flex;
+  border-radius: 50%;
+  border: 1px rgba(0, 0, 0, 0.3) solid;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  .avatarCover {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    opacity: 0;
+    transition: 0.5s;
+    span {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      color: #fff;
+      font-size: 0.5rem;
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  &:hover {
+    .avatarCover {
+      opacity: 1;
+    }
+  }
+  .avatarImg {
+    margin: auto;
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
   }
 }
 </style>

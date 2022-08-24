@@ -1,19 +1,26 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { reqComment} from "@/api"
+import { reqComment, reqDeleteComment} from "@/api"
 
 Vue.use(Vuex)
 
 export default {
     state: {
-        subSuccess: false
+        subSuccess: false,
+        deleteSuccess:false
     },
     mutations: {
        SUBCOMMENT(state) {
         state.subSuccess = true
        },
-       FLAGCHANGE(state) {
+       SUCCESSCHANGE(state) {
         state.subSuccess = false
+       },
+       DELETESUCCESS(state) {
+        state.deleteSuccess = true
+       },
+       DELETECHANGE(state) {
+        state.deleteSuccess = false
        }
         
     },
@@ -24,8 +31,18 @@ export default {
                 commit('SUBCOMMENT')
             }
         },
-        flagChange({commit}) {
-            commit('FLAGCHANGE')
+        async deleteComment({commit}, params) {
+            let res = await reqDeleteComment(params)
+            if (res.code == 200) {
+                commit('DELETESUCCESS')
+            }
+           
+        },
+        successChange({commit}) {
+            commit('SUCCESSCHANGE')
+        },
+        deleteChange({commit}) {
+            commit('DELETECHANGE')
         }
     },
     getters: {}

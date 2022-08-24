@@ -4,7 +4,7 @@
       <div class="left">
         <el-image
           style="width: 80%; height: 80%;  border-radius: 0.5rem;"
-          :src="work.photos[0]?.url"
+          :src="work.photo"
           fit="cover"
         ></el-image>
       </div>
@@ -14,7 +14,6 @@
           <div v-if="false">作者:{{ work.author }}</div>
           <div>{{ work.opusType }}</div>
           <div>{{ work.opusIntroduce }}</div>
-          <!-- <div class="describe">介绍:{{ work.opusIntroduce }}</div> -->
         </div>
         <!-- <div class="handle">
           <div class="icons">

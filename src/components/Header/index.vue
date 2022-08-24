@@ -11,7 +11,7 @@
       </el-col>
       <el-col :span="14">
         <el-menu
-          :default-active="activeIndex"
+          :default-active="currentRoute"
           mode="horizontal"
           background-color="rgb(243,240,232)"
           @select="handleSelect"
@@ -27,10 +27,12 @@
       >
       <el-col :span="6"
         ><el-input
+          v-if="this.$router.currentRoute.name == 'Works'"
           placeholder="请输入内容"
           prefix-icon="el-icon-search"
+          clearable
           v-model="searchInput"
-          @blur="goSearch"
+          @keyup.enter.native="goSearch"
         >
         </el-input
       ></el-col>
@@ -38,11 +40,9 @@
         <div class="block">
           <el-dropdown>
             <span class="el-dropdown-link avatarLink">
-              <el-avatar
-                :size="50"
-                :src="avatarUrl"
-                @click.native="goUserPage"
-              ></el-avatar>
+              <el-avatar :size="50" :src="avatarUrl" @click.native="goUserPage">
+                <span v-if="!avatarUrl">登录</span></el-avatar
+              >
             </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item
@@ -74,6 +74,9 @@
         </div>
       </el-col>
     </el-row>
+    <el-backtop>
+      <div class="up">↾</div>
+    </el-backtop>
   </div>
 </template>
 
@@ -83,11 +86,11 @@ export default {
   name: "myNavigation",
   data() {
     return {
-      activeIndex: "Home",
+      currentRoute: this.$router.currentRoute.name,
       navIndex: [
-        { navName: "首页", navRouter: "Home" },
-        { navName: "作品", navRouter: "Works" },
-        { navName: "商城", navRouter: "Shop" },
+        { navName: "首页", navRouter: "/Home" },
+        { navName: "作品", navRouter: "/Works" },
+        { navName: "商城", navRouter: "/Shop" },
       ],
       searchInput: "",
     };
@@ -103,12 +106,15 @@ export default {
       if (n == 1) {
         this.$message({
           type: "success",
-          message: "登陆成功!",
+          message: `[登陆成功] ${this.$store.state.login.userdata.webName}`,
         });
         this.$store.dispatch("getUserData", {
           email: this.$store.state.login.userdata.email,
         });
       }
+    },
+    currentRoute(n) {
+      return n;
     },
   },
   methods: {
@@ -117,10 +123,6 @@ export default {
     },
     checkLogin() {
       if (this.getLocalData("user")) {
-        this.$message({
-          type: "success",
-          message: this.$store.state.login.userdata.webName,
-        });
         this.$store.dispatch("getUserData", {
           email: this.$store.state.login.userdata.email,
         });
@@ -159,27 +161,24 @@ export default {
       }
     },
     goSearch() {
-      this.activeIndex = "Works";
-      let location = {
-        name: "Works",
-        params: { key: this.searchInput || undefined },
-      };
-      this.$router.push(location);
+      this.$store.dispatch("worksList", {
+        opusType: "",
+        opusName: this.searchInput,
+      });
     },
     exitLogin() {
       localStorage.removeItem("feiyiuser");
       localStorage.removeItem("userTimestamp");
       this.$store.state.login.userdata = {};
       this.$store.state.login.isLogin = 0;
+      this.$router.push("/Home");
+      location.reload();
       this.$message({
         message: "退出登录成功！",
       });
-      this.$router.push("/Home");
-      location.reload();
     },
   },
   mounted() {
-    this.activeIndex = this.$router.currentRoute.name;
     this.checkLogin();
   },
 };
@@ -212,12 +211,20 @@ export default {
         cursor: pointer;
       }
       .block {
-        margin-top: 5%;
+        margin-top: 4%;
+        .el-dropdown {
+          margin-left: 50%;
+        }
         .avatarLink {
           cursor: pointer;
         }
       }
     }
   }
+}
+.up {
+  text-align: center;
+  line-height: 40px;
+  color: rgb(197,183,173);
 }
 </style>

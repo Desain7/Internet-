@@ -25,8 +25,7 @@ export default {
         async chageUserInfo({commit}, params) {
             let res = await reqUpdateUser(params)
             if(res.code == 200) {
-                commit()
-                this.getUserData()
+                commit('')
             }
         }
     },

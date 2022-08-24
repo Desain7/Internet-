@@ -1,6 +1,6 @@
 <template>
     <div>
-        我是编辑
+        我是添加
     </div>
 </template>
 

@@ -21,9 +21,14 @@
           </div>
           <div class="type">
             <span class="title">作者：</span>
-            <span class="content" style="cursor: pointer">{{
-              workInform.author
-            }}</span>
+            <div class="author" style="cursor: pointer">
+              {{ workInform.author.name }}
+              <div class="authorCard">
+                <div class="avatar">
+                  <img :src="workInform.author.photos" alt="" />
+                </div>
+              </div>
+            </div>
           </div>
           <div class="type">
             <span class="title">创建时间：</span>
@@ -39,6 +44,7 @@
             <el-image
               style="width: 100%; height: 100%"
               :src="item"
+              :preview-src-list="[item]"
               fit="cover"
             ></el-image>
           </div>
@@ -48,6 +54,14 @@
         <div class="workDescribe">
           {{ workInform.opusIntroduce }}
         </div>
+        <div class="workVideo" v-if="workInform.video">
+          <div class="content">
+            <video controls>
+              <source :src="workInform.video" type="video/mp4" />
+            </video>
+          </div>
+        </div>
+        <el-divider v-if="workInform.video">视频介绍</el-divider>
         <div v-if="workInform.make" class="workDescribe">
           {{ workInform.make }}
         </div>
@@ -60,8 +74,30 @@
         </div>
       </div>
       <div class="workOperate">
-        <el-button round>点赞<i class="iconfont icon-good"></i></el-button>
-        <el-button round>收藏<i class="iconfont icon-favorites"></i></el-button>
+        <el-button round v-if="!workInform.isSupport" @click="supportWork"
+          >点赞<i class="iconfont icon-good"></i
+          >{{ workInform.support }}</el-button
+        >
+        <el-button
+          type="success"
+          round
+          v-if="workInform.isSupport"
+          @click="supportWork"
+          >点赞<i class="iconfont icon-good-fill"></i
+          >{{ workInform.support }}</el-button
+        >
+        <el-button round v-if="!workInform.isCollection" @click="collectWork"
+          >收藏<i class="iconfont icon-favorites"></i
+          >{{ workInform.collection }}</el-button
+        >
+        <el-button
+          type="warning"
+          round
+          v-if="workInform.isCollection"
+          @click="collectWork"
+          >收藏<i class="iconfont icon-favorites-fill"></i
+          >{{ workInform.collection }}</el-button
+        >
       </div>
     </div>
     <div class="workComments">
@@ -80,39 +116,31 @@
         <el-button type="primary" round @click="subComment">发布评论</el-button>
       </div>
       <div class="commentsContent">
-        <div
-          class="reply-wrap"
-          v-for="(item, index) in workInform.comments?.records"
-          :key="index"
-        >
+        <div class="reply-wrap" v-for="(item, index) in comment" :key="index">
           <div class="user-face">
-            <a target="_blank">
-              <div class="avatar" style="transform: translate(0, -15px)">
-                <el-avatar
-                  :size="50"
-                  src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-                ></el-avatar>
+            <a href="javascript:;">
+              <div class="avatar" style="transform: translate(10px, -5px)">
+                <el-avatar :size="50" :src="item.headPhoto"></el-avatar>
               </div>
             </a>
           </div>
           <div class="con">
             <div class="user">
               <a
-                href=""
-                target="_black"
+                href="javascript:;"
                 class="name"
                 style="text-decoration: none"
               >
-                {{ item.email }}
+                {{ item.WebName }}
               </a>
             </div>
             <p class="text">
-              {{ item.comments }}
+              {{ item.comment.comments }}
             </p>
             <div class="info">
               <span class="time-location">
                 <span class="reply-time">
-                  {{ item.createTime }}
+                  {{ item.comment.createTime }}
                 </span>
               </span>
               <div class="operation more-operation">
@@ -125,12 +153,18 @@
                     ></i>
                     <div
                       class="support"
-                      v-if="item.support"
+                      v-if="item.comment.support"
                       style="display: inline-block"
                     >
-                      {{ item.support }}
+                      {{ item.comment.support }}
                     </div>
                   </el-button>
+                  <el-button
+                    v-if="$store.state.login.userdata?.role == 'admin'"
+                    type="text"
+                    @click="deleteComment(item.comment.id)"
+                    >删除</el-button
+                  >
                 </div>
               </div>
             </div>
@@ -155,6 +189,10 @@ export default {
     ...mapState({
       workInform: (state) => state.works.workInform,
       commentSuccess: (state) => state.comments.subSuccess,
+      deleteSuccess: (state) => state.comments.deleteSuccess,
+      comment: (state) => state.works.workInform.comments?.records,
+      supportWorkSuccess: (state) => state.worksConfig.supportSuccess,
+      collectWorkSuccess: (state) => state.worksConfig.collectSuccess,
     }),
   },
   watch: {
@@ -164,14 +202,54 @@ export default {
           pageSize: "",
           pageNo: "",
           opusId: this.workInform.id,
-          email: "",
+          email: this.$store.state.login.userdata.email,
         };
         this.$store.dispatch("workInform", params);
-        this.$store.dispatch("flagChange");
+        this.$store.dispatch("successChange");
         this.$message({
           type: "success",
           message: "评论成功！",
         });
+      }
+    },
+    deleteSuccess(newValue) {
+      if (newValue) {
+        let params = {
+          pageSize: "",
+          pageNo: "",
+          opusId: this.workInform.id,
+          email: this.$store.state.login.userdata.email,
+        };
+        this.$store.dispatch("workInform", params);
+        this.$store.dispatch("deleteChange");
+        this.$message({
+          type: "success",
+          message: "删除评论成功！",
+        });
+      }
+    },
+    supportWorkSuccess(newValue) {
+      if (newValue) {
+        let params = {
+          pageSize: "",
+          pageNo: "",
+          opusId: this.workInform.id,
+          email:this.$store.state.login.userdata.email,
+        };
+        this.$store.dispatch("workInform", params);
+        this.$store.dispatch("supportChange");
+      }
+    },
+    collectWorkSuccess(newValue) {
+      if (newValue) {
+        let params = {
+          pageSize: "",
+          pageNo: "",
+          opusId: this.workInform.id,
+          email: this.$store.state.login.userdata.email,
+        };
+        this.$store.dispatch("workInform", params);
+        this.$store.dispatch("collectChange");
       }
     },
   },
@@ -187,19 +265,45 @@ export default {
         this.commentInput = "";
       } else {
         this.$message({
-          type:'error',
-          message:'请先登录再执行操作!'
-        })
+          type: "error",
+          message: "请先登录再执行操作!",
+        });
       }
     },
     supportComment(item) {
       if (!item.userSupport) {
         item.userSupport = true;
-        item.support++;
+        item.comment.support++;
       } else {
         console.log(123);
         this.$message("您已经点过赞了！");
       }
+    },
+    async deleteComment(id) {
+      const result = await this.$confirm("确定删除该评论吗？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).catch((err) => err);
+      if (result !== "confirm") {
+        return this.$message.info("已取消删除操作！");
+      } else {
+        this.$store.dispatch("deleteComment", id);
+      }
+    },
+    supportWork() {
+        let supportData = {
+          id: this.workInform.id,
+          email: this.$store.state.login.userdata.email,
+        };
+        this.$store.dispatch("supportWork", supportData);
+    },
+    collectWork() {
+        let collectData = {
+          id: this.workInform.id,
+          email: this.$store.state.login.userdata.email,
+        };
+        this.$store.dispatch("collectWork", collectData);
     },
   },
   mounted() {
@@ -249,9 +353,44 @@ export default {
       justify-content: center;
       .type {
         width: 20%;
-        height: 50%;
+        height: 80%;
+        position: relative;
+        .authorCard {
+          opacity: 0;
+          position: absolute;
+          background-color: #fff;
+          width: 20rem;
+          height: 12rem;
+          border-radius: 5%;
+          left: 20%;
+          top: 150%;
+          z-index: 99;
+          transition: 0.5s;
+          .avatar {
+            margin-left: 5%;
+            margin-top: 5%;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            border: 1px solid #000;
+            img {
+              width: 100%;
+              height: 100%;
+              border-radius: 50%;
+            }
+          }
+        }
         .title {
           font-weight: bold;
+        }
+        .author {
+          display: inline-block;
+          &:hover {
+            .authorCard {
+              opacity: 1;
+              
+            }
+          }
         }
       }
     }
@@ -266,7 +405,18 @@ export default {
         height: 20rem;
       }
     }
-
+    .workVideo {
+      display: flex;
+      .content {
+        display: flex;
+        margin: auto;
+        video {
+          margin: auto;
+          width: 50%;
+          width: 60vh;
+        }
+      }
+    }
     .workDescribe {
       text-indent: 2em !important;
       font-size: 18px !important;

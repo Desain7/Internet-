@@ -49,32 +49,26 @@ export const reqUserInfo = (query) => request({
 
 //作品相关请求
 //#region 
-export const reqWorksList = (query) =>  request({url:"/opus/opusList", method:"get", query:query})
+export const reqWorksList = (params) =>  request({url:"/opus/opusList", method:"get", params:params})
 
 export const reqAuthorWork = () =>  request({url:"/opus/list/1", method:"get"})
 
-export const reqSearchWork = (params) => request({
-    url:'/opus/likeOpus',
-    method:'get',
-    params:params
-})
-
-export const reqSaveWork = (params) => request({
+export const reqSaveWork = (data) => request({
     url:'/opus/save',
     method:'post',
-    params:params
+    data:data
 })
 
-export const reqUpdateWork = (params) => request({
+export const reqUpdateWork = (data) => request({
     url:'/opus/update',
     method:'post',
-    params:params
+    data:data
 })
 
-export const reqDeleteWork = (params) => request({
+export const reqDeleteWork = (data) => request({
     url:'/opus/delete',
     method:'post',
-    params:params
+    data:data
 })
 
 export const reqWorkInform = (params) => request({
@@ -83,22 +77,32 @@ export const reqWorkInform = (params) => request({
     params:params
 })
 
-export const reqUploadPhoto = (query, params) => request({
-    url:'/opus/delete',
+export const reqHotWorks = () => request({
+    url:'/opus/getHot',
+    method:'get',
+})
+
+export const reqUploadPhoto = (params) => request({
+    url:'/opusPhoto/upload',
     method:'post',
-    query:query,
     params:params
 })
 
-export const reqCollectionList = (query) => request({
+export const reqDeletePhoto = (params) => request({
+    url:'/opusPhoto/deleteById',
+    method:'delete',
+    params:params
+})
+
+export const reqCollectionList = (params) => request({
     url:'/collection',
     method:'get',
-    query:query
+    params:params
 })
-export const reqSupportList = (query) => request({
+export const reqSupportList = (params) => request({
     url:'/support',
     method:'get',
-    query:query
+    params:params
 })
 
 //#endregion
@@ -120,10 +124,9 @@ export const reqComment = (params) => request({
     method:'get',
     params:params
 })
-export const reqDeleteComment = (query) => request({
-    url:'/comments/delete/1',
+export const reqDeleteComment = (params) => request({
+    url:`/comments/delete/${params}`,
     method:'delete',
-    query:query
 })
 //#endregion
 
@@ -131,10 +134,10 @@ export const reqDeleteComment = (query) => request({
 //#region 
 export const reqAuthorInform = () => request({url:'/author/info/2', method:'get'})
 
-export const reqSaveAuthor = (params) => request({
+export const reqSaveAuthor = (data) => request({
     url:'/author/save',
     method:'post',
-    params:params,
+    data:data,
 })
 
 export const reqUpdateAuthor = (params) => request({

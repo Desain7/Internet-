@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { reqIdentifyCode, login} from "@/api"
+import { reqIdentifyCode, login, register} from "@/api"
 
 Vue.use(Vuex)
 
@@ -9,6 +9,7 @@ export default {
         isLogin:0,
         showLogin: false,
         identifyCode:'',
+        errorMessage:'',
         userdata:null
     },
     mutations: {
@@ -20,9 +21,13 @@ export default {
         },
         LOGIN(state, loginData) {
             state.userdata = loginData
+            state.errorMessage = ''
             state.isLogin = 1
             localStorage.setItem('feiyiuser', JSON.stringify(loginData))
             localStorage.setItem(`userTimestamp`, Date.now()); 
+        },
+        LOGINFAIL(state, failMsg) {
+            state.errorMessage = failMsg
         }
         
     },
@@ -43,6 +48,15 @@ export default {
             if(res.code == 200) {
                 commit("SHOWLOGIN")
                 commit('LOGIN',res.data)
+            } else {
+                commit('LOGINFAIL',res.data)
+            }
+        },
+        async register({commit}, params) {
+            let res = await register(params)
+            if(res.code == 200) {
+                commit("SHOWLOGIN")
+                commit('REGISTER',res.data)
             }
         }
     },
