@@ -111,7 +111,7 @@ export default {
         this.$store.dispatch("getUserData", {
           email: this.$store.state.login.userdata.email,
         });
-      }
+      }  //检测当前是否登录
     },
     currentRoute(n) {
       return n;

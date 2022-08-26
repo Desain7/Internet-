@@ -14,7 +14,7 @@
             <div class="picture" @click="goInform(item)">
               <div class="img">
                 <el-image :src="item.photos[1]?.url" fit="cover"> </el-image>
-                <div class="title">{{ item.opusTitle }}</div>
+                <div class="title"><div class="text">{{ item.opusTitle }}</div></div>
               </div>
             </div>
             <!-- <div class="describe">
@@ -111,19 +111,30 @@ export default {
 
               .title {
                 opacity: 1;
-                display: block;
+                display: flex;
                 transform: translate(-50%, -50%);
+                background-color: rgba(0,0,0,0.5);
               }
             }
             .title {
               position: absolute;
+              width: 80%;
+              height: 20%;
               top: 50%;
               left: 50%;
               transform: translate(-250%, -50%);
               font-size: 25px;
-              text-shadow: #fff -1px -1px;
               opacity: 0;
               transition: 1s;
+              display: flex;
+              border-radius: 5px;
+              background-color: rgba(20,20,20,0.1);
+              .text{
+                text-align: center;
+                width: 50%;
+                margin: auto;
+                color: #fff;
+              }
             }
           }
         }

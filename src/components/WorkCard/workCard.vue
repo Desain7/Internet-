@@ -46,7 +46,7 @@ export default {
 <style lang="scss" >
 .work-card {
   display: inline-block;
-  margin: 1%;
+  margin: 22px;
   .work-box-card {
     margin-top: 5%;
     width: 25rem;

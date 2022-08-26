@@ -54,9 +54,6 @@
           </el-table-column>
           <el-table-column prop="opusType" label="作品分类" width="100px">
           </el-table-column>
-
-          <el-table-column prop="opusTitle" label="标题" width="100px">
-          </el-table-column>
           <el-table-column
             label="创建时间"
             width="150px"
@@ -64,7 +61,7 @@
             :sortable="true"
           >
           </el-table-column>
-          <el-table-column label="操作" width="120px">
+          <el-table-column label="操作" width="220px">
             <template slot-scope="scope">
               <el-button
                 type="primary"
@@ -72,6 +69,12 @@
                 size="mini"
                 @click="handleEdit(scope.row)"
               ></el-button>
+              <el-button
+                type="primary"
+                size="mini"
+                @click="handleAuthorInfo(scope.row)"
+                >作者信息</el-button
+              >
               <el-button
                 type="danger"
                 icon="el-icon-delete"
@@ -193,6 +196,7 @@
                 >下一步</el-button
               >
             </el-tab-pane>
+            <!-- 发送第一次请求保存作品基本信息  -->
             <el-tab-pane label="作者信息" name="2" :disabled="activeIndex != 2">
               <el-form-item label="作者" prop="name">
                 <el-input v-model="addAuthorForm.name"></el-input>
@@ -206,7 +210,7 @@
                       :on-success="handleAvatarSuccess"
                       :before-upload="beforeAvatarUpload"
                     >
-                      <span> 更换头像 </span>
+                      <span> 修改</span>
                     </el-upload>
                   </div>
 
@@ -232,6 +236,7 @@
                 >下一步</el-button
               >
             </el-tab-pane>
+            <!-- 发送第二次请求保存作者信息 -->
             <el-tab-pane label="作品图片" name="3" :disabled="activeIndex != 3">
               <el-form-item label="图片">
                 <img
@@ -275,6 +280,7 @@
                 >下一步</el-button
               >
             </el-tab-pane>
+            <!-- 发送第三次请求保存作品图片 -->
             <el-tab-pane label="作品视频" name="4" :disabled="activeIndex != 4">
               <el-button type="primary" @click="completeAdd" class="saveWork"
                 >保存作品</el-button
@@ -283,6 +289,47 @@
           </el-tabs>
         </el-form>
       </el-card>
+      <el-dialog
+        title="编辑作者"
+        :visible.sync="editAuthorVisible"
+        width="50%"
+        @close="editAuthorClosed"
+      >
+        <el-form :model="authorInfo" label-width="100px">
+          <el-form-item label="作者">
+            <el-input v-model="authorInfo.name"></el-input>
+          </el-form-item>
+          <el-form-item label="头像">
+            <div class="avatar">
+              <div class="avatarCover">
+                <el-upload
+                  action="/api/user/uploadHead"
+                  :show-file-list="false"
+                  :on-success="handleEditAvatarSuccess"
+                  :before-upload="beforeAvatarUpload"
+                >
+                  <span>修改</span>
+                </el-upload>
+              </div>
+              <img class="avatarImg" :src="authorInfo.photos" alt="" />
+            </div>
+          </el-form-item>
+          <el-form-item label="年龄">
+            <el-input v-model="authorInfo.age"></el-input>
+          </el-form-item>
+          <el-form-item label="性别">
+            <el-select v-model="authorInfo.sex">
+              <el-option label="男" value="男"></el-option>
+              <el-option label="女" value="女"></el-option>
+              <el-option label="其他" value="其他"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click.native="editAuthorVisible = false">取 消</el-button>
+          <el-button type="primary" @click="confirmEditAuthor">确 定</el-button>
+        </span>
+      </el-dialog>
       <el-dialog
         title="编辑作品"
         :visible.sync="editWorkVisible"
@@ -316,7 +363,11 @@
             <el-input v-model="editWorkInform.opusTitle"></el-input>
           </el-form-item>
           <el-form-item label="作品主图">
-            <el-image class="pictureLi" :src="editWorkInform.photo" :preview-src-list="[editWorkInform.photo]"/>
+            <el-image
+              class="pictureLi"
+              :src="editWorkInform.photo"
+              :preview-src-list="[editWorkInform.photo]"
+            />
           </el-form-item>
           <el-form-item label="图片">
             <div
@@ -324,7 +375,7 @@
               v-for="(item, index) in editWorkInform.photos"
               :key="index"
             >
-              <el-image class="pictureLi" :src="item.url"/>
+              <el-image class="pictureLi" :src="item.url" />
               <div class="handle">
                 <span @click="editWorkInform.photo = item.url"
                   ><i class="el-icon-check"></i>设为主图</span
@@ -341,10 +392,12 @@
               :auto-upload="false"
               :data="{ opusId: editWorkInform.id }"
               style="display: inline-block"
+              :file-list="fileList"
+              :on-change="addFile"
               :on-success="uploadPictureSuccess"
               :before-upload="beforePictureUpload"
             >
-              <i slot="default" class="el-icon-plus"></i>
+              <i slot="trigger" class="el-icon-plus"></i>
               <div slot="file" slot-scope="{ file }">
                 <img
                   class="el-upload-list__item-thumbnail"
@@ -430,8 +483,13 @@ export default {
       disabled: false,
       editWorkInform: {},
       addWorksForm: {},
-      addAuthorForm: {},
+      addAuthorForm: {
+        photos:
+          "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
+      },
       editWorkVisible: false,
+      editAuthorVisible: false,
+      fileList: [],
       queryInfo: {
         //请求参数
         query: "",
@@ -445,6 +503,7 @@ export default {
     ...mapState({
       worksList: (state) => state.works.worksList,
       workId: (state) => state.works.workId,
+      authorInfo: (state) => state.works.workInform.author || {},
     }),
   },
   methods: {
@@ -466,6 +525,23 @@ export default {
       this.editWorkInform = e;
       this.editWorkVisible = true;
     },
+    editWorkClosed() {},
+    handleAuthorInfo(e) {
+      let params = {
+        pageSize: this.queryInfo.pageSize,
+        pageNo: this.queryInfo.pageNum,
+        opusId: e.id,
+        email: this.$store.state.login.userdata?.email || "",
+      };
+      this.$store.dispatch("workInform", params);
+      this.editAuthorVisible = true;
+    },
+    confirmEditAuthor() {
+      delete this.authorInfo.opusId
+      this.$store.dispatch('updateAuthor', this.authorInfo)
+      this.editAuthorVisible = false
+    },
+    editAuthorClosed() {},
     handleSearch() {
       this.$store.dispatch("worksList", {
         opusType: "",
@@ -487,8 +563,11 @@ export default {
             this.editWorkInform.photos.splice(index, 1);
           }
         });
-        this.$store.dispatch("deletePhoto", {id:id + ""});
+        this.$store.dispatch("deletePhoto", { id: id + "" });
       }
+    },
+    addFile(file) {
+      this.fileList.push(file);
     },
     handleRemove(file) {
       console.log(file);
@@ -517,7 +596,7 @@ export default {
         opusId: "",
         url: res.data,
       });
-    },
+    }, //上传图片成功后触发
     uploadFirstPictureSuccess(res) {
       console.log(res.data);
       this.addWorksForm.photos.push({
@@ -537,7 +616,7 @@ export default {
         this.$message.error("上传图片只能是 JPG 或 PNG 格式!");
       }
       return isLt2M && (isJPG || isPNG);
-    },
+    }, //限制图片大小类型
     beforeVideoUpload(file) {
       const isLt100M = file.size / 1024 / 1024 < 100;
       const isMP4 = file.type === "video/mp4";
@@ -559,18 +638,19 @@ export default {
       this.$refs.photoUpload.submit();
       this.$store.dispatch("commitWorkEdit", this.editWorkInform);
       location.reload();
-    },
+    }, //提交编辑作品的表单
     submitAdd() {
       this.$store.dispatch("submitAddWork", this.addWorksForm);
-    },
+    }, //提交添加作品的表单
     completeAdd() {
       this.activeIndex = "5";
       location.reload();
     },
     submitAuthor() {
       let authorForm = this.addAuthorForm;
-      authorForm.opus_id = this.workId + "";
+      authorForm.opusId = this.workId +"";
       authorForm.age = authorForm.age + "";
+      JSON.stringify(authorForm)
       this.$store.dispatch("submitAuthor", authorForm);
     },
     nextIndex() {
@@ -627,7 +707,9 @@ export default {
     handleAvatarSuccess(res) {
       this.addAuthorForm.photos = res.data;
     },
-    editWorkClosed() {},
+    handleEditAvatarSuccess(res) {
+      this.editAuthorForm.photos = res.data;
+    },
     handleSizeChange() {},
     handleCurrentChange() {},
   },

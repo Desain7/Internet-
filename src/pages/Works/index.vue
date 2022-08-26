@@ -1,3 +1,4 @@
+
 <template>
   <div>
     <worksCategory></worksCategory>
@@ -29,7 +30,7 @@
 <script>
 import workCard from "@/components/WorkCard/workCard.vue";
 import worksCategory from "@/components/Category/index.vue";
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 export default {
   name: "worksPage",
   data() {
@@ -212,10 +213,10 @@ export default {
       // ],
     };
   },
-  computed:{
+  computed: {
     ...mapState({
-      worksList: state => state.works.worksList
-    })
+      worksList: (state) => state.works.worksList,
+    }),
   },
   methods: {
     changePage(val) {
@@ -224,12 +225,12 @@ export default {
     },
     goInform(item) {
       let params = {
-        pageSize:this.pageSize,
-        pageNo:this.currentIndex,
-        opusId:item.id,
-        email:this.$store.state.login.userdata?.email || ''
-      }
-      this.$store.dispatch('workInform', params)
+        pageSize: this.pageSize,
+        pageNo: this.currentIndex,
+        opusId: item.id,
+        email: this.$store.state.login.userdata?.email || "",
+      };
+      this.$store.dispatch("workInform", params);
       let location = { name: "WorkInform", params: params };
       this.$router.push(location);
     },
@@ -238,8 +239,8 @@ export default {
     workCard,
     worksCategory,
   },
-mounted() {
-    this.$store.dispatch("worksList", {opusType:'', opusName:''});
+  mounted() {
+    this.$store.dispatch("worksList", { opusType: "", opusName: "" });
   },
 };
 </script>

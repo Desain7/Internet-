@@ -4,7 +4,7 @@ module.exports = defineConfig({
   devServer:{
     proxy:{
       '/api':{
-        target:'http://47.99.47.99:8080/feiyi',
+        target:'http://47.99.47.99:8080/feiyi', //代理地址
         pathRewrite: {
           '/api': '' 
         }

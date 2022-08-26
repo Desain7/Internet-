@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { reqIdentifyCode, login, register} from "@/api"
+import { reqIdentifyCode, login, register, reqEmailCode, reqForgetPass} from "@/api"
 
 Vue.use(Vuex)
 
@@ -41,6 +41,12 @@ export default {
                 commit('GETCODE', res.data)
             }
         },
+        async getEmailCode({commit},params) {
+            let res = await reqEmailCode(params)
+            if(res.code == 200) {
+                commit('EMAILCODE')
+            }
+        },
         async login({commit}, params = {}) {
             console.log(params)
             let res = await login(params)
@@ -57,6 +63,13 @@ export default {
             if(res.code == 200) {
                 commit("SHOWLOGIN")
                 commit('REGISTER',res.data)
+            }
+        },
+        async forgetPass({commit}, params) {
+            let res = await reqForgetPass(params)
+            if(res.code == 200) {
+                commit("SHOWLOGIN")
+                commit('FORGETPASS',res.data)
             }
         }
     },

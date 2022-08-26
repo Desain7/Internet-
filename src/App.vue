@@ -31,6 +31,14 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+@media screen and (max-width:1450px) {
+
+#app {
+width:1450px;
+
+}
+
+}
 body {
   background-image: url("@/assets/background.jpg");
 }

@@ -10,6 +10,12 @@ export const login = (params) => request({
     method:'post',
     params:params,
 })
+
+export const reqEmailCode = (params) => request({
+    url:'/userConfig/getCode',
+    method:'post',
+    params:params,
+})
 //#endregion
 
 //用户信息配置
@@ -43,6 +49,16 @@ export const reqUserInfo = (query) => request({
     url:'/user/getByEmail',
     method:'get',
     params:query,
+})
+export const reqUserFavor = (params) => request({
+    url:'/support/getByEmail',
+    method:'get',
+    params:params,
+})
+export const reqUserCollection = (params) => request({
+    url:'collection/getByEmail',
+    method:'get',
+    params:params,
 })
 
 //#endregion
@@ -140,10 +156,10 @@ export const reqSaveAuthor = (data) => request({
     data:data,
 })
 
-export const reqUpdateAuthor = (params) => request({
+export const reqUpdateAuthor = (data) => request({
     url:'/author/update',
     method:'post',
-    params:params,
+    data:data,
 })
 //#endregion
 

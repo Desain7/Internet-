@@ -8,8 +8,9 @@
               action="/api/user/uploadHead"
               :show-file-list="false"
               :on-success="handleAvatarSuccess"
-              :before-upload="beforeAvatarUpload"
+              :before-upload="beforeAvatarUpload"  
             >
+            <!-- 上传用户头像 -->
               <span> 更换头像 </span>
             </el-upload>
           </div>
@@ -18,14 +19,53 @@
         </div>
         <div class="userInfo">
           <div class="mainInfo">
-            <div class="con1">
-              <div class="name">{{ userInfo.name }}</div>
-              <div class="age">{{ userInfo.age }}</div>
-              <div class="sex">{{ userInfo.sex }}</div>
-            </div>
-            <div class="con2">
-              <div class="address">{{ userInfo.address }}</div>
-            </div>
+              <el-descriptions
+                class="margin-top"
+                :column="3"
+              >
+                <el-descriptions-item>
+                  <template slot="label">
+                    <i class="el-icon-user"></i>
+                    用户名
+                  </template>
+                  {{ userInfo.name }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template slot="label">
+                    <i class="el-icon-date"></i>
+                    年龄
+                  </template>
+                  {{ userInfo.age }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template slot="label">
+                    <i class="el-icon-male"></i>
+                    性别
+                  </template>
+                  {{ userInfo.sex }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template slot="label">
+                    <i class="el-icon-mobile-phone"></i>
+                    手机号
+                  </template>
+                  {{ userInfo.phone }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template slot="label">
+                    <i class="el-icon-location-outline"></i>
+                    居住地
+                  </template>
+                  {{ userInfo.address }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template slot="label">
+                    <i class="el-icon-tickets"></i>
+                    备注
+                  </template>
+                  <el-tag size="small">学校</el-tag>
+                </el-descriptions-item>
+              </el-descriptions>
           </div>
         </div>
       </div>
@@ -36,14 +76,17 @@
             class="el-menu-vertical-demo"
             router
           >
-            <el-menu-item  v-for="(item, index) in navIndex" :key="index" :index="item.navRouter">
+            <el-menu-item
+              v-for="(item, index) in navIndex"
+              :key="index"
+              :index="item.navRouter"
+            >
               <i :class="item.navIcon"></i>
-              <span slot="title">{{item.navName}}</span>
+              <span slot="title">{{ item.navName }}</span>
             </el-menu-item>
           </el-menu>
         </div>
-          <router-view></router-view>
-
+        <router-view></router-view>
       </div>
     </div>
   </div>
@@ -56,30 +99,42 @@ export default {
   data() {
     return {
       navIndex: [
-        { navName: "个人资料", navIcon:'el-icon-user-solid', navRouter: "/User/info" },
-        { navName: "喜欢", navIcon:'el-icon-s-grid', navRouter: "/User/favor" },
-        { navName: "收藏", navIcon:'el-icon-star-on', navRouter: "/User/collect" },
+        {
+          navName: "个人资料",
+          navIcon: "el-icon-user-solid",
+          navRouter: "/User/info",
+        },
+        {
+          navName: "点赞",
+          navIcon: "el-icon-s-grid",
+          navRouter: "/User/favor",
+        },
+        {
+          navName: "收藏",
+          navIcon: "el-icon-star-on",
+          navRouter: "/User/collect",
+        },
       ],
     };
   },
   methods: {
     beforeAvatarUpload(file) {
       const isLt2M = file.size / 1024 / 1024 < 2;
-       const isJPG = file.type === 'image/jpeg';
-       const isPNG = file.type === 'image/png';
+      const isJPG = file.type === "image/jpeg";
+      const isPNG = file.type === "image/png";
       if (!isLt2M) {
         this.$message.error("上传头像图片大小不能超过 2MB!");
       }
       if (!isJPG && !isPNG) {
-          this.$message.error('上传头像图片只能是 JPG 或 PNG 格式!');
-        }
+        this.$message.error("上传头像图片只能是 JPG 或 PNG 格式!");
+      }
       return isLt2M && (isJPG || isPNG);
     },
     handleAvatarSuccess(res) {
       let avatarChange = this.userInfo;
       avatarChange.headPicture = res.data;
-      console.log(123,avatarChange);
-      console.log(456,res.data);
+      console.log(123, avatarChange);
+      console.log(456, res.data);
       this.$store.dispatch("chageUserInfo", avatarChange);
     },
   },
@@ -97,7 +152,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$border-color:rgb(241,243,244);
+$border-color: rgb(241, 243, 244);
 .userCard {
   width: 80%;
   height: 95vh;
@@ -162,29 +217,18 @@ $border-color:rgb(241,243,244);
         display: flex;
         margin: 2%;
         padding: 1%;
-        .con1 {
-          width: 20%;
-          .name {
-            font-size: 2rem;
-            font-weight: 100;
-          }
-        }
-        .con2 {
-          width: 40%;
-          div {
-            padding: 1%;
-            font-size: 1.2rem;
-            font-weight: 100;
-          }
+        .margin-top{
+          margin-top: 3%;
         }
       }
     }
   }
-  .userContent{
+  .userContent {
     height: 80%;
-    .leftContent{
+    display: flex;
+    .leftContent {
       height: 100%;
-      width: 10%;
+      width: 11%;
       background-color: #fff;
       overflow: hidden;
       display: inline-block;

@@ -76,7 +76,7 @@
                   >登录</el-button
                 >
                 <p class="login" @click="goRegister">没有账号？立即注册</p>
-                <p class="login" @click="goRegister">忘记密码</p>
+                <p class="login" @click="goforgetPass">忘记密码</p>
               </el-form-item>
             </el-form>
           </div>
@@ -164,12 +164,94 @@
           </div>
         </div>
       </transition>
+      <transition name="slide">
+        <div class="register-wrapper" v-show="page == 2" ref="forgetPass">
+          <div id="register">
+            <p class="title">重置密码</p>
+            <el-form
+              :model="forgetPassForm"
+              status-icon
+              ref="forgetPassForm"
+              label-width="0"
+              class="demo-ruleForm"
+              :rules="registerRules"
+            >
+              <el-form-item
+                prop="email"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入邮箱地址',
+                    trigger: 'blur',
+                  },
+                  {
+                    type: 'email',
+                    message: '请输入正确的邮箱地址',
+                    trigger: ['blur', 'change'],
+                  },
+                ]"
+              >
+                <el-input
+                  v-model="forgetPassForm.email"
+                  auto-complete="off"
+                  placeholder="请输入邮箱"
+                ></el-input>
+              </el-form-item>
+              <el-form-item
+                prop="code"
+                class="code"
+                :rules="{
+                  required: true,
+                  message: '请输入验证码',
+                  trigger: 'blur',
+                }"
+              >
+                <el-input
+                  v-model="forgetPassForm.code"
+                  placeholder="请输入验证码"
+                ></el-input>
+                <el-button
+                  type="primary"
+                  :disabled="isDisabled"
+                  @click="sendCode"
+                  >{{ buttonText }}</el-button
+                >
+              </el-form-item>
+              <el-form-item prop="pass">
+                <el-input
+                  type="password"
+                  v-model="forgetPassForm.pass"
+                  auto-complete="off"
+                  placeholder="请输入新的密码"
+                ></el-input>
+              </el-form-item>
+              <el-form-item prop="checkPass">
+                <el-input
+                  type="password"
+                  v-model="forgetPassForm.checkPass"
+                  auto-complete="off"
+                  placeholder="确认密码"
+                ></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button
+                  type="primary"
+                  @click="submitChange()"
+                  style="width: 100%"
+                  >重置</el-button
+                >
+                <p class="login" @click="goLogin">已有账号？立即登录</p>
+              </el-form-item>
+            </el-form>
+          </div>
+        </div>
+      </transition>
     </div>
   </transition>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 import SIdentify from "../SIdentify";
 export default {
   name: "loginPage",
@@ -206,6 +288,12 @@ export default {
         checkPass: "",
         code: "",
       },
+      forgetPassForm: {
+        email: "",
+        pass: "",
+        checkPass: "",
+        code: "",
+      },
       registerRules: {
         pass: [{ validator: validatePass, trigger: "blur" }],
         checkPass: [{ validator: validatePass2, trigger: "blur" }],
@@ -216,28 +304,33 @@ export default {
       isDisabled: false,
     };
   },
-  computed:{
+  computed: {
     ...mapState({
-      errMsg:state => state.login.errorMessage
-    })
+      errMsg: (state) => state.login.errorMessage,
+    }),
   },
-  watch:{
+  watch: {
     errMsg(n) {
-      if(n != '') {
+      if (n != "") {
         this.$message({
-          type:'error',
-          message:`[登陆失败] ${n}`
-        })
-        this.$store.state.login.errorMessage = ''
+          type: "error",
+          message: `[登陆失败] ${n}`,
+        });
+        this.$store.state.login.errorMessage = "";
       }
-    }
+    }, //监测返回的登录失败信息
   },
   methods: {
     //点击遮罩层关闭窗口
     hide(e) {
       let login = this.$refs.login;
       let register = this.$refs.register;
-      if (!login.contains(e.target) && !register.contains(e.target)) {
+      let forgetPass = this.$refs.forgetPass;
+      if (
+        !login.contains(e.target) &&
+        !register.contains(e.target) &&
+        !forgetPass.contains(e.target)
+      ) {
         this.$store.dispatch("showLogin");
       }
     },
@@ -256,11 +349,26 @@ export default {
     submitRegister() {
       if (this.registerForm.pass == this.registerForm.pass) {
         let register = {
-          email:this.registerForm.email,
-          password:this.registerForm.pass,
-          yzm:this.registerForm.code
-        }
+          email: this.registerForm.email,
+          password: this.registerForm.pass,
+          yzm: this.registerForm.code,
+        };
         this.$store.dispatch("register", register);
+      } else {
+        this.$message({
+          type: "error",
+          message: "两次密码输入不一致!",
+        });
+      }
+    },
+    submiChange() {
+      if (this.forgetPassForm.pass == this.forgetPassForm.pass) {
+        let forgetPass = {
+          email: this.forgetPassForm.email,
+          password: this.forgetPassForm.pass,
+          yzm: this.forgetPassForm.code,
+        };
+        this.$store.dispatch("forgetPass", forgetPass);
       } else {
         this.$message({
           type: "error",
@@ -271,6 +379,9 @@ export default {
     goRegister() {
       this.page = 1;
     },
+    goforgetPass() {
+      this.page = 2;
+    },
     goLogin() {
       this.getCode();
       this.page = 0;
@@ -278,6 +389,9 @@ export default {
     sendCode() {
       if (!this.timer) {
         this.$message("发送成功!");
+        this.$store.dispatch("getEmailCode", {
+          email: this.registerForm.email,
+        });
         this.timer = setInterval(() => {
           if (this.timeCount > 0) {
             this.timeCount--;

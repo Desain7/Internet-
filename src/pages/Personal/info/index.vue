@@ -73,11 +73,11 @@ export default {
 <style lang="scss" scoped>
 .content {
   display: inline-block;
-  height: 75%;
-  width: 71%;
+  height: 90%;
+  width: 100%;
   background-color: #fff;
-  position: absolute;
   box-sizing: border-box;
+  position: relative;
   .userInfo {
     .text {
       font-size: 1.2rem;

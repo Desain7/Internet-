@@ -22,11 +22,22 @@
           <div class="type">
             <span class="title">作者：</span>
             <div class="author" style="cursor: pointer">
-              {{ workInform.author.name }}
+              {{ workInform.author?.name }}
               <div class="authorCard">
                 <div class="avatar">
-                  <img :src="workInform.author.photos" alt="" />
+                  <img :src="workInform.author?.photos" alt="" />
                 </div>
+                <!-- <div class="describeContent">
+                  <div class="text">
+                    {{ workInform.author?.name }}
+                  </div>
+                  <div class="text">
+                    {{ workInform.author?.age }}
+                  </div>
+                  <div class="text">
+                    {{ workInform.author?.sex }}
+                  </div>
+                </div> -->
               </div>
             </div>
           </div>
@@ -366,6 +377,7 @@ export default {
           top: 150%;
           z-index: 99;
           transition: 0.5s;
+          visibility: hidden;
           .avatar {
             margin-left: 5%;
             margin-top: 5%;
@@ -388,7 +400,7 @@ export default {
           &:hover {
             .authorCard {
               opacity: 1;
-              
+              visibility: visible;
             }
           }
         }

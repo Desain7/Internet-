@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { reqSaveAuthor} from "@/api"
+import { reqSaveAuthor, reqUpdateAuthor} from "@/api"
 
 Vue.use(Vuex)
 
@@ -20,6 +20,12 @@ export default {
             let res = await reqSaveAuthor(data)
             if(res.code == 200) {
                 commit('SUBMITSUCCESS')
+            }
+        },
+        async updateAuthor({commit}, data) {
+            let res = await reqUpdateAuthor(data)
+            if(res.code == 200) {
+                commit('')
             }
         },
     },
